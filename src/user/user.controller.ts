@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { AuthGuard } from './auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -14,5 +15,17 @@ export class UserController {
     @Post()
     async create(@Body() data: Partial<User>): Promise<Partial<User>> {
         return this.userService.create(data);
+    }
+
+
+    @Post('signin')
+    async login(@Body() data: Partial<User>): Promise<{message: string, token: string}> {
+        return this.userService.login(data);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    getProfile(@Request() req) {
+        return this.userService.getProfile(req);
     }
 }

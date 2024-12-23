@@ -2,16 +2,23 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
 @Injectable()
 export class UserService {
+  
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        private readonly jwtService: JwtService
     ) { }
 
     async findAll(): Promise<User[]> {
         return this.userRepository.find()
+    }
+
+    async findById(id: number): Promise<User>{
+        return this.userRepository.findOne({where:{id}})
     }
 
     async create(data: Partial<User>): Promise<Partial<User>> {
@@ -33,4 +40,18 @@ export class UserService {
         return userWithoutPassword;
     }
 
+    async login(data: Partial<User>): Promise<{message: string, token: string}>{
+        const userExists = await this.userRepository.findOne({ where: { email: data.email } })
+        if (!userExists) throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+
+        const passwordMatches = await bcrypt.compare(data.password, userExists.password);
+        if (!passwordMatches)throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED)
+         const payload = {id: userExists.id, isAdmin: userExists.isAdmin}   
+        return { message: "Logged in successfuly" , token: await this.jwtService.signAsync(payload)}
+    }
+
+    getProfile(req: any) {
+        const { password, ...result } = req?.user;
+        return result;
+    }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, HttpStatus, HttpCode } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { AuthGuard } from './auth.guard';
@@ -7,21 +7,18 @@ import { AuthGuard } from './auth.guard';
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
-    @Get()
-    async findAll(): Promise<User[]> {
-        return this.userService.findAll();
-    }
-
-    @Post()
-    async create(@Body() data: Partial<User>): Promise<Partial<User>> {
+    @Post('signup')
+    async create(@Body() data: Partial<User>): Promise<any> {
         return this.userService.create(data);
     }
 
 
     @Post('signin')
-    async login(@Body() data: Partial<User>): Promise<{message: string, token: string}> {
+    @HttpCode(200) 
+    async login(@Body() data: Partial<User>): Promise<{message: string, token: string, user: object}> {
         return this.userService.login(data);
     }
+
 
     @UseGuards(AuthGuard)
     @Get('profile')
@@ -29,3 +26,7 @@ export class UserController {
         return this.userService.getProfile(req);
     }
 }
+
+
+
+

@@ -6,6 +6,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
+import { FamiliesController } from './families/families.controller';
+import { MembersController } from './members/members.controller';
+import { MembersService } from './members/members.service';
+import { FamiliesService } from './families/families.service';
+import { FamiliesModule } from './families/families.module';
+import { MembersModule } from './members/members.module';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [
@@ -23,11 +31,14 @@ import { User } from './user/user.entity';
         autoLoadEntities: true,
         entities: [User],
         synchronize:true
-      })
-    }),
-    UserModule
+      }),
+
+      }),
+    UserModule,
+    FamiliesModule,
+    MembersModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, FamiliesController, MembersController],
+  providers: [AppService, MembersService, FamiliesService, JwtService, UserService],
 })
 export class AppModule {}

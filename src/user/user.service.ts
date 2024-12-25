@@ -13,15 +13,13 @@ export class UserService {
         private readonly jwtService: JwtService
     ) { }
 
-    async findAll(): Promise<User[]> {
-        return this.userRepository.find()
-    }
+    
 
     async findById(id: number): Promise<User>{
         return this.userRepository.findOne({where:{id}})
     }
 
-    async create(data: Partial<User>): Promise<Partial<User>> {
+    async create(data: Partial<User>): Promise<any> {
         if (!data.isAdmin) {
             throw new HttpException('Not allowed', HttpStatus.BAD_REQUEST);
         }
@@ -37,17 +35,21 @@ export class UserService {
         });
         const savedUser = await this.userRepository.save(user);
         const { password, ...userWithoutPassword } = savedUser; 
-        return userWithoutPassword;
+        return { message:"User registered successfully", user:userWithoutPassword};
     }
 
-    async login(data: Partial<User>): Promise<{message: string, token: string}>{
+    async login(data: Partial<User>): Promise<{message: string, token: string, user: object}>{
         const userExists = await this.userRepository.findOne({ where: { email: data.email } })
         if (!userExists) throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED);
-
         const passwordMatches = await bcrypt.compare(data.password, userExists.password);
         if (!passwordMatches)throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED)
-         const payload = {id: userExists.id, isAdmin: userExists.isAdmin}   
-        return { message: "Logged in successfuly" , token: await this.jwtService.signAsync(payload)}
+        const payload = { id: userExists.id, isAdmin: userExists.isAdmin }
+        const {password, ...result} = userExists
+        return {
+            message: "Logged in successfuly",
+            user: result,
+            token: await this.jwtService.signAsync(payload)
+        }
     }
 
     getProfile(req: any) {

@@ -6,10 +6,7 @@ export class User {
     id: number;
 
     @Column()
-    firstname: string;
-   
-    @Column()
-    lastname: string;
+    username: string;
 
     @Column({ unique: true })
     email: string;
@@ -18,5 +15,12 @@ export class User {
     password: string;
 
     @Column()
-    isAdmin : boolean
+    isAdmin: boolean
+    
+    @Column()
+    isFather: boolean
+    
+    @Column()
+    isMother: boolean
 }
+

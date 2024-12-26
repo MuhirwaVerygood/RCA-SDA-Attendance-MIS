@@ -14,7 +14,7 @@ import { MembersService } from './members.service';
 import { CreateMemberDTO, UpdateMemberDTO } from './members.dto';
 import { Member } from './members.entity';
 import { AuthGuard } from 'src/user/auth.guard';
-import { ApiBearerAuth, ApiTags, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiResponse, ApiParam, ApiBody, ApiOperation } from '@nestjs/swagger';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Members')
@@ -24,6 +24,7 @@ export class MembersController {
 
     @UseGuards(AuthGuard)
     @Post(':familyId')
+    @ApiOperation({ summary: 'Add a new member to a family' })    
     @ApiParam({ name: 'familyId', description: 'The ID of the family', example: 1 })
     @ApiBody({ type: CreateMemberDTO })
     @ApiResponse({ status: HttpStatus.CREATED, description: 'Member added successfully' })
@@ -37,6 +38,7 @@ export class MembersController {
 
     @UseGuards(AuthGuard)
     @Get(':familyId')
+    @ApiOperation({ summary: 'Delete a member by family ID' })
     @ApiParam({ name: 'familyId', description: 'The ID of the family', example: 1 })
     @ApiResponse({ status: HttpStatus.OK, description: 'List of members retrieved successfully' })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Family not found' })
@@ -46,6 +48,7 @@ export class MembersController {
 
     @UseGuards(AuthGuard)
     @Get()
+    @ApiOperation({ summary: 'Get all members' })    
     @ApiResponse({ status: HttpStatus.OK, description: 'List of all members retrieved successfully' })
     async getAllMembers(): Promise<Member[]> {
         return this.membersService.getAllMembers();
@@ -54,6 +57,7 @@ export class MembersController {
     @UseGuards(AuthGuard)
     @Get('member/:memberId')
     @ApiParam({ name: 'memberId', description: 'The ID of the member', example: 1 })
+    @ApiOperation({ summary: 'Get a member by member ID' })    
     @ApiResponse({ status: HttpStatus.OK, description: 'Member details retrieved successfully' })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Member not found' })
     async getMemberById(@Param('memberId') memberId: number): Promise<Member> {
@@ -63,6 +67,7 @@ export class MembersController {
     @UseGuards(AuthGuard)
     @Put('member/:memberId')
     @ApiParam({ name: 'memberId', description: 'The ID of the member', example: 1 })
+    @ApiOperation({ summary: 'Update a member by member ID' })    
     @ApiBody({ type: UpdateMemberDTO })
     @ApiResponse({ status: HttpStatus.OK, description: 'Member updated successfully' })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Member not found' })
@@ -76,6 +81,7 @@ export class MembersController {
     @UseGuards(AuthGuard)
     @Delete('member/:memberId')
     @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Delete a member by member ID' })      
     @ApiParam({ name: 'memberId', description: 'The ID of the member', example: 1 })
     @ApiResponse({ status: HttpStatus.OK, description: 'Member deleted successfully' })
     @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Member not found' })

@@ -11,7 +11,7 @@ import {
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { AuthGuard } from './auth.guard';
-import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDTO, LoginUserDTO } from './user.dto';
 
 @ApiTags('Users')
@@ -20,6 +20,7 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Post('signup')
+    @ApiOperation({ summary: 'Register a user' })    
     @ApiBody({ type: CreateUserDTO })
     @ApiResponse({ status: HttpStatus.CREATED, description: 'User successfully registered' })
     @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user with that email already exists' })
@@ -30,6 +31,7 @@ export class UserController {
     @Post('signin')
     @HttpCode(200)
     @ApiBody({ type: LoginUserDTO })
+    @ApiOperation({ summary: 'Login a user' })    
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Logged in successfully',
@@ -53,6 +55,8 @@ export class UserController {
     async login(@Body() data: LoginUserDTO): Promise<{ message: string; token: string; user: object }> {
         return this.userService.login(data);
     }
+
+    @ApiOperation({ summary: 'Get a user profile' })
 
     @UseGuards(AuthGuard)
     @Get('profile')

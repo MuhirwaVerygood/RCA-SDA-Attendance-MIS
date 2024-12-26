@@ -8,7 +8,7 @@ async function bootstrap() {
 
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
+    .setTitle('RCA-SDA Attendance MIS')
     .setDescription('The RCA-SDA Attendance API description')
     .setVersion('1.0')
     .addTag('RCA SDA Attendance MIS')

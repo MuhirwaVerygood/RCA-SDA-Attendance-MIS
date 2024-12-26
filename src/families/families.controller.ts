@@ -9,54 +9,75 @@ import {
     HttpCode,
     HttpStatus,
     NotFoundException,
+    UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FamiliesService } from './families.service';
 import { Family } from './families.entity';
+import { AuthGuard } from 'src/user/auth.guard';
+import { CreateFamilyDto, UpdateFamilyDto } from './families.dto';
 
+@ApiTags('Families')
+@ApiBearerAuth()
 @Controller('families')
 export class FamiliesController {
     constructor(private readonly familiesService: FamiliesService) { }
 
-    // Create a new family
+    @UseGuards(AuthGuard)
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async createFamily(
-        @Body() familyData: { familyName: string; father: string; mother: string },
-    ): Promise<Family> {
-        const { familyName, father, mother } = familyData;
+    @ApiOperation({ summary: 'Create a new family' })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'Family created successfully.', type: Family })
+    async createFamily(@Body() createFamilyDto: CreateFamilyDto): Promise<Family> {
+        const { familyName, father, mother } = createFamilyDto;
         return this.familiesService.createFamily(familyName, father, mother);
     }
 
-    // Get all families
+    @UseGuards(AuthGuard)
     @Get()
+    @ApiOperation({ summary: 'Get all families' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'List of families retrieved successfully.', type: [Family] })
     async getAllFamilies(): Promise<Family[]> {
         return this.familiesService.getAllFamilies();
     }
 
-    // Get a family by ID
+    @UseGuards(AuthGuard)
     @Get(':id')
+    @ApiOperation({ summary: 'Get a family by ID' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the family', example: 1 })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Family retrieved successfully.', type: Family })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Family not found.' })
     async getFamilyById(@Param('id') id: number): Promise<Family> {
         const family = await this.familiesService.getFamilyById(id);
         if (!family) {
-            throw new NotFoundException(`Family with ID ${id} not found`);
+            throw new NotFoundException(`Family with ID ${id} not found.`);
         }
         return family;
     }
 
-    // Update a family's details
+    @UseGuards(AuthGuard)
     @Put(':id')
-    async updateFamily(
-        @Param('id') id: number,
-        @Body() familyData: { familyName?: string; father?: string; mother?: string },
-    ): Promise<Family> {
-        const { familyName, father, mother } = familyData;
+    @ApiOperation({ summary: 'Update family details' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the family to update', example: 1 })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Family updated successfully.', type: Family })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Family not found.' })
+    async updateFamily(@Param('id') id: number, @Body() updateFamilyDto: UpdateFamilyDto): Promise<Family> {
+        const { familyName, father, mother } = updateFamilyDto;
         return this.familiesService.updateFamily(id, familyName, father, mother);
     }
 
-    // Delete a family
+    @UseGuards(AuthGuard)
     @Delete(':id')
     @HttpCode(HttpStatus.OK)
-    async deleteFamily(@Param('id') id: number): Promise<{message: string}> {
+    @ApiOperation({ summary: 'Delete a family' })
+    @ApiParam({ name: 'id', description: 'Unique ID of the family to delete', example: 1 })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Family deleted successfully.',
+        schema: { type: 'object', properties: { message: { type: 'string', example: 'Family deleted successfully.' } } },
+    })
+    @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Family not found.' })
+    async deleteFamily(@Param('id') id: number): Promise<{ message: string }> {
         return this.familiesService.deleteFamily(id);
     }
 }

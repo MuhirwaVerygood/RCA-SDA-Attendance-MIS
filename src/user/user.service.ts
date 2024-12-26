@@ -40,9 +40,9 @@ export class UserService {
 
     async login(data: Partial<User>): Promise<{message: string, token: string, user: object}>{
         const userExists = await this.userRepository.findOne({ where: { email: data.email } })
-        if (!userExists) throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+        if (!userExists) throw new HttpException("Invalid password or email", HttpStatus.UNAUTHORIZED);
         const passwordMatches = await bcrypt.compare(data.password, userExists.password);
-        if (!passwordMatches)throw new HttpException("Invalid email or password", HttpStatus.UNAUTHORIZED)
+        if (!passwordMatches)throw new HttpException("Invalid  password or email", HttpStatus.UNAUTHORIZED)
         const payload = { id: userExists.id, isAdmin: userExists.isAdmin }
         const {password, ...result} = userExists
         return {

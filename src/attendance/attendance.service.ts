@@ -57,8 +57,8 @@ export class AttendanceService {
         return result;
     }
 
-    async addAttendanceByFamily(addAttendanceByFamilyDto: AddAttendanceByFamilyDto) {
-        const { familyId, date, attendanceDetails } = addAttendanceByFamilyDto;
+    async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto) :  Promise<{message: string}>{
+        const {  date, attendanceDetails } = addAttendanceByFamilyDto;
         const family = await this.familiesService.getFamilyById(familyId);
         if (!family) {
             throw new NotFoundException(`Family with id: ${familyId} does not exist`)

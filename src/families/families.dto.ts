@@ -16,7 +16,6 @@ export class CreateFamilyDto {
 }
 
 
-
 export class UpdateFamilyDto {
     @ApiPropertyOptional({ example: 'Johnson Family', description: 'The name of the family' })
     @IsString()

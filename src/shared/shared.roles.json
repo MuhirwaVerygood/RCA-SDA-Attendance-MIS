@@ -1,0 +1,6 @@
+{
+    "roles": {
+        "admin": ["add_attendance", "view_all_attendance", "edit_attendance", "delete_attendance"],
+            "father": ["add_attendance", "view_own_attendance"]
+    }
+}

@@ -1,3 +1,6 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { IsDate } from "class-validator";
+
 export class AttendanceSummaryDto {
     abanditswe: number;
     abaje: number;
@@ -15,8 +18,22 @@ export class GroupedAttendanceDto extends AttendanceSummaryDto {
 }
 
 export class AddAttendanceByFamilyDto {
-    familyId: number;
+    @ApiProperty({ example: "YYYY-mm-DD" })
+     @IsDate()
     date: string;
+    
+    @ApiProperty({
+        example: {
+            abanditswe: 10, 
+            abaje: 10, 
+            abasuye: 10, 
+            abasuwe: 10, 
+            abafashije: 10, 
+            abafashijwe: 10, 
+            abatangiyeIsabato: 10, 
+            abarwayi: 10, 
+            abafiteImpamvu: 10,       
+    }})
     attendanceDetails: {
         abanditswe: number;
         abaje: number;

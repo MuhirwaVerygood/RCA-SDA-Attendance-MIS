@@ -16,7 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 global: true,
                 secret: configService.get<string>("SECRET", "INITIAL VALUE"),
                 signOptions: {
-                    expiresIn:"1h"
+                    expiresIn:"1d"
                 }
             })
         })

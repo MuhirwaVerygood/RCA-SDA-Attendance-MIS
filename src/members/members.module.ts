@@ -19,7 +19,7 @@ import { User } from 'src/user/user.entity';
                         global: true,
                         secret: configService.get<string>("SECRET", "INITIAL VALUE"),
                         signOptions: {
-                            expiresIn:"1h"
+                            expiresIn:"1d"
                         }
                     })
                 })

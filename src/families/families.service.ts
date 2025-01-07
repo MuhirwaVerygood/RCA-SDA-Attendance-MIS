@@ -56,10 +56,10 @@ export class FamiliesService {
         const family = await this.familyRepository.findOne({ where: { id } });
         if (!family) {
             throw new NotFoundException(`Family with ID ${id} not found`);
-        }
+        }   
+        
 
         await this.familyRepository.delete(id);
         return {message:"Family Deleted Successfully"}
     }
-
 }

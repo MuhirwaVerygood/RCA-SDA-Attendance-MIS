@@ -1,18 +1,48 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate } from "class-validator";
+import { IsDate, IsInt, IsOptional, Min } from "class-validator";
 
 export class AttendanceSummaryDto {
-    abanditswe: number;
-    abaje: number;
-    abasuye: number;
-    abasuwe: number;
-    abafashije: number;
-    abafashijwe: number;
-    abatangiyeIsabato: number;
-    abarwayi: number;
-    abafiteImpamvu: number;
-}
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    abanditswe?: number;
 
+    @IsInt()
+    @Min(0)
+    abaje: number;
+
+    @IsInt()
+    @Min(0)
+    abasuye: number;
+
+    @IsInt()
+    @Min(0)
+    abasuwe: number;
+
+    @IsInt()
+    @Min(0)
+    abafashije: number;
+
+    @IsInt()
+    @Min(0)
+    abafashijwe: number;
+
+    @IsInt()
+    @Min(0)
+    abatangiyeIsabato: number;
+
+    @IsInt()
+    @Min(0)
+    abarwayi: number;
+
+    @IsInt()
+    @Min(0)
+    abafiteImpamvu: number;
+
+    @IsInt()
+    @Min(0)
+    abashyitsi: number; 
+}
 export class GroupedAttendanceDto extends AttendanceSummaryDto {
     date: string;
 }
@@ -24,7 +54,6 @@ export class AddAttendanceByFamilyDto {
     
     @ApiProperty({
         example: {
-            abanditswe: 10, 
             abaje: 10, 
             abasuye: 10, 
             abasuwe: 10, 
@@ -33,9 +62,10 @@ export class AddAttendanceByFamilyDto {
             abatangiyeIsabato: 10, 
             abarwayi: 10, 
             abafiteImpamvu: 10,       
-    }})
+        }
+    })
+        
     attendanceDetails: {
-        abanditswe: number;
         abaje: number;
         abasuye: number;
         abasuwe: number;

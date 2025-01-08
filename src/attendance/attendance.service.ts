@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Attendance } from './attendance.entity';
 import { Repository } from 'typeorm';
-import { AddAttendanceByFamilyDto } from './attendance.dto';
+import { AddAttendanceByFamilyDto, AttendanceSummaryDto } from './attendance.dto';
 import { FamiliesService } from 'src/families/families.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class AttendanceService {
     ) { }
 
     // Method to calculate total attendance for each category on a given day (Sabbath)
-    async getTotalAttendance(date: string) {
+    async getTotalAttendance(date: string) : Promise<any> {
         const result = await this.attendanceRepository
             .createQueryBuilder('attendance')
             .select([
@@ -33,7 +33,10 @@ export class AttendanceService {
             .where('attendance.date = :date', { date }) // Filter by the given date
             .getRawOne(); // Get the raw result
 
-        return result;
+        
+        // check if all fields in the result are null
+        const allNull = Object.values(result).every(value => value === null)
+        return allNull ? [] : result;
     }
 
 
@@ -60,16 +63,65 @@ export class AttendanceService {
     async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto) :  Promise<{message: string}>{
         const {  date, attendanceDetails } = addAttendanceByFamilyDto;
         const family = await this.familiesService.getFamilyById(familyId);
+        const abanditswe = family.members.length;
         if (!family) {
             throw new NotFoundException(`Family with id: ${familyId} does not exist`)
         }
 
+        // Validate attendanceDetails against abanditswe
+        for (const [key, value] of Object.entries(attendanceDetails)) {
+            if (value > abanditswe) {
+                throw new BadRequestException(
+                    `Invalid value for '${key}': ${value}. It cannot exceed the total family members (${abanditswe}).`,
+                );
+            }
+        }
+
         await this.attendanceRepository.create({
+            abanditswe,
             family,
             date,
             ...attendanceDetails
         });
 
         return { message: "Attendance added successfully" }
+    }
+
+
+    async addGeneralAttendanceByForm(attendanceSummary: AttendanceSummaryDto) : Promise <{message: string}>{
+        
+        const families = await this.familiesService.getAllFamilies();
+        
+        const validatedAttendance = {
+            abaje: attendanceSummary.abaje || 0,
+            abasuye: attendanceSummary.abasuye || 0,
+            abasuwe: attendanceSummary.abasuwe || 0,
+            abafashije: attendanceSummary.abafashije || 0,
+            abafashijwe: attendanceSummary.abafashijwe || 0,
+            abatangiyeIsabato: attendanceSummary.abatangiyeIsabato || 0,
+            abarwayi: attendanceSummary.abarwayi || 0,
+            abafiteImpamvu: attendanceSummary.abafiteImpamvu || 0,
+        };
+        const abashyitsi = attendanceSummary.abashyitsi || 0;
+
+        const totalChurchMembers = families.reduce((total, family) => total + family.members.length, 0)
+        for (const [key, value] of Object.entries(validatedAttendance)) {
+            if (value > totalChurchMembers) {
+                throw new BadRequestException(
+                    `Invalid value for '${key}': ${value}. It cannot exceed the total church members (${totalChurchMembers}).`,
+                );
+            }
+        }
+
+        // Create a new general attendance record without a family
+        await this.attendanceRepository.save({
+            ...validatedAttendance, 
+            abanditswe: totalChurchMembers,
+            abashyitsi,
+            date: new Date().toISOString().split('T')[0], // Current date in 'YYYY-MM-DD' format
+            family: null, // No family associated with this record
+        });
+
+        return {message : "Attendance added successfully"}
     }
 }

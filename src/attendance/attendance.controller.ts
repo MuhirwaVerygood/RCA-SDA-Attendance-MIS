@@ -98,4 +98,12 @@ export class AttendanceController {
     ): Promise<{ message: string }> {
         return this.attendanceService.addAttendanceByFamily(familyId,addAttendanceByFamilyDto);
     }
+
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Permissions(Permission.AddGeneralAttendance)    
+    @Post("general/form")
+    async addGeneralAttendanceByForm(@Body() generalAttendance: AttendanceSummaryDto): Promise<{message: string}> {
+        return this.attendanceService.addGeneralAttendanceByForm(generalAttendance);
+    }
 }

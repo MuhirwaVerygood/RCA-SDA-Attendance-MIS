@@ -13,6 +13,9 @@ import { User } from './user.entity';
 import { AuthGuard } from './auth.guard';
 import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDTO, LoginUserDTO } from './user.dto';
+import { RolesGuard } from 'src/shared/shared.roleguard';
+import { Permissions } from 'src/shared/shared.permissions.decorator';
+import { Permission } from 'src/shared/shared.permission.enum';
 
 @ApiTags('Users')
 @Controller('users')
@@ -58,7 +61,7 @@ export class UserController {
 
     @ApiOperation({ summary: 'Get a user profile' })
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Get('profile')
     @ApiBearerAuth()
     @ApiResponse({

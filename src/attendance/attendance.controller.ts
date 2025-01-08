@@ -28,7 +28,8 @@ import { Permissions } from 'src/shared/shared.permissions.decorator';
 export class AttendanceController {
     constructor(private readonly attendanceService: AttendanceService) { }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, RolesGuard)
+    @Permissions(Permission.ViewGeneralAttendance)
     @Get('total/:date')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Get total attendance for a specific date' })
@@ -61,7 +62,7 @@ export class AttendanceController {
 
 
     @UseGuards(AuthGuard, RolesGuard)
-    @Permissions(Permission.AddAttendance)
+    @Permissions(Permission.AddFamilyAttendance)
     @Post("/:familyId")
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Add attendance for a specific family' })

@@ -1,6 +1,22 @@
 {
     "roles": {
-        "admin": ["add_attendance", "view_all_attendance", "edit_attendance", "delete_attendance"],
-            "father": ["add_attendance", "view_own_attendance"]
+        "admin": [
+            "add_general_attendance",
+            "view_general_attendance",
+            "edit_general_attendance",
+            "delete_general_attendance"
+        ],
+        "father": [
+            "add_family_attendance",
+            "view_own_attendance",
+            "edit_own_attendance",
+            "delete_own_attendance"
+        ],
+        "mother": [
+            "add_family_attendance",
+            "view_own_attendance",
+            "edit_own_attendance",
+            "delete_own_attendance"
+        ]
     }
 }

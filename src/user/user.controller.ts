@@ -83,6 +83,6 @@ export class UserController {
     @UseGuards(AuthGuard)
     @Post("familyHeads")
     async addFamilyHeads(@Body() invitationRequest: InviteFamilyHeadDto , @Req() req ): Promise<{message:string}> {
-        return await this.userService.addFamilyHeads(invitationRequest, req.user.email);
+        return await this.userService.addFamilyHeads(invitationRequest, req);
     }
 }

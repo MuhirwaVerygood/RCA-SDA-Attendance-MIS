@@ -43,6 +43,7 @@ export class UserService {
         return { message:"User registered successfully", user:userWithoutPassword};
     }
 
+
     async login(data: Partial<User>): Promise<{message: string, token: string, user: object}>{
         const userExists = await this.userRepository.findOne({ where: { email: data.email } })
         if (!userExists) throw new HttpException("Invalid password or email", HttpStatus.UNAUTHORIZED);
@@ -63,7 +64,7 @@ export class UserService {
     }
 
   
-    async addFamilyHeads(invitation: InviteFamilyHeadDto, currentAdminEmail: string): Promise<{ message: string }> {
+    async addFamilyHeads(invitation: InviteFamilyHeadDto, req: any): Promise<{ message: string }> {
         const family = await this.familyService.getFamilyById(invitation.familyId);
         if (!family) {
             throw new HttpException('Family not found', HttpStatus.NOT_FOUND);
@@ -94,7 +95,7 @@ export class UserService {
         // Get all admins
         
         const allAdmins = await this.userRepository.find({ where: { isAdmin: true } });
-        const otherAdmins = allAdmins.filter(admin => admin.email !== currentAdminEmail);
+        const otherAdmins = allAdmins.filter(admin => admin.email !== req.user.email);
 
         // Send email notifications to other admins
         for (const admin of otherAdmins) {
@@ -104,7 +105,7 @@ export class UserService {
             await this.mailerService.sendMail({
                 to: admin.email,
                 subject: 'New Family Head Added',
-                text: `Dear Admin, \n\nThis is to inform you that the admin ${currentAdminEmail} has added ${invitation.username} as a ${role} of the family: ${family.familyName}. \n\nBest regards,\nYour Admin Team`,
+                text: `Dear ${admin.username}, \n\nThis is to inform you that the admin ${req.user.username} has added ${invitation.username} as a ${role} of the family: ${family.familyName}. \n\nBest regards,\nYour Admin Team`,
             });
         }
 

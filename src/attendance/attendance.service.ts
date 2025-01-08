@@ -4,6 +4,7 @@ import { Attendance } from './attendance.entity';
 import { Repository } from 'typeorm';
 import { AddAttendanceByFamilyDto, AttendanceSummaryDto } from './attendance.dto';
 import { FamiliesService } from 'src/families/families.service';
+import { getPreviousSabbathDate, getSaturdayOccurrence,  } from './sabbathAttendance.utils';
 
 @Injectable()
 export class AttendanceService {
@@ -41,7 +42,8 @@ export class AttendanceService {
 
 
     async getGroupedAttendances(): Promise<any> {
-        const result = await this.attendanceRepository.createQueryBuilder("attendance")
+        // Get raw attendance data grouped by date
+        const rawAttendances = await this.attendanceRepository.createQueryBuilder("attendance")
             .select([
                 'attendance.date',
                 'SUM(attendance.abanditswe) AS abanditswe',
@@ -56,20 +58,53 @@ export class AttendanceService {
             ])
             .groupBy("attendance.date")
             .orderBy("attendance.date", "DESC")
-            .getRawMany()
-        return result;
-    }
+            .getRawMany();
+
+        const sabbathNames = ["Ubutabazi", "Umuryango", "JA", "Mifem", "Abana"];
+
+        // Process and enrich data
+    
+        const enrichedData = rawAttendances.map((attendance) => {            
+            if (!attendance.attendance_date) {
+                throw new Error(`Missing or invalid date in attendance record: ${JSON.stringify(attendance)}`);
+            }
+
+            const sabbathDate = getPreviousSabbathDate(attendance.attendance_date);
+            const sabbathDateString = sabbathDate.toISOString();
+
+            const occurrence = getSaturdayOccurrence(sabbathDateString)
+            const sabbathName = sabbathNames[(occurrence - 1) % sabbathNames.length]; // Use modulo for cyclic mapping
+
+            return {
+                ...attendance,
+                sabbathDate,
+                sabbathName
+            };
+        });
+        
+        // Group attendances by Sabbath date
+        const groupedAttendances = enrichedData.reduce((group: Record<string, any[]>, record) => {
+            const sabbath = record.sabbathDate;
+            group[sabbath] = group[sabbath] || [];
+            group[sabbath].push(record);
+            return group;
+        }, {});
+
+        return groupedAttendances;
+    } 
 
     async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto) :  Promise<{message: string}>{
-        const {  date, attendanceDetails } = addAttendanceByFamilyDto;
+        const {   attendanceDetails } = addAttendanceByFamilyDto;
         const family = await this.familiesService.getFamilyById(familyId);
         const abanditswe = family.members.length;
         if (!family) {
             throw new NotFoundException(`Family with id: ${familyId} does not exist`)
         }
 
+        const { abashyitsi, ...withoutAbashyitsi } = attendanceDetails;
+
         // Validate attendanceDetails against abanditswe
-        for (const [key, value] of Object.entries(attendanceDetails)) {
+        for (const [key, value] of Object.entries(withoutAbashyitsi)) {
             if (value > abanditswe) {
                 throw new BadRequestException(
                     `Invalid value for '${key}': ${value}. It cannot exceed the total family members (${abanditswe}).`,
@@ -77,13 +112,17 @@ export class AttendanceService {
             }
         }
 
-        await this.attendanceRepository.create({
+        const date = new Date(Date.now())
+        const sabbathDate = getPreviousSabbathDate(date);
+        const attendance = this.attendanceRepository.create({
             abanditswe,
             family,
-            date,
-            ...attendanceDetails
+            ...withoutAbashyitsi,
+            abashyitsi,
+            date: sabbathDate
         });
 
+        await this.attendanceRepository.save(attendance);
         return { message: "Attendance added successfully" }
     }
 

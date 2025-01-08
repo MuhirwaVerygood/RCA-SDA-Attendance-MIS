@@ -29,7 +29,7 @@ export class Attendance{
     abashyitsi: number
 
     @Column({ type: "date" })
-    date: string   
+    date: Date   
         
     @ManyToOne(()=> Family , (family)=> family.attendances, {onDelete: "CASCADE"})
     family: Family

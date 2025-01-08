@@ -47,6 +47,8 @@ export class AttendanceController {
         return await this.attendanceService.getTotalAttendance(date);
     }
 
+
+    
     @UseGuards(AuthGuard)
     @Get('grouped')
     @HttpCode(HttpStatus.OK)

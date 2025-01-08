@@ -1,6 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Member } from "src/members/members.entity";
 import { Attendance } from "src/attendance/attendance.entity";
+import { User } from "src/user/user.entity";
 
 @Entity("families")
 export class Family {
@@ -21,4 +22,7 @@ export class Family {
 
     @OneToMany(()=>Attendance, (attendance)=> attendance.family, {cascade: true} )
     attendances: Attendance[]
+
+    @OneToMany(() => User, (user) => user.family)
+    heads: User[];
 }

@@ -7,16 +7,13 @@ import {
     Request,
     HttpCode,
     HttpStatus,
+    Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './user.entity';
 import { AuthGuard } from './auth.guard';
 import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { CreateUserDTO, LoginUserDTO } from './user.dto';
+import { CreateUserDTO,  InviteFamilyHeadDto, LoginUserDTO } from './user.dto';
 import { RolesGuard } from 'src/shared/shared.roleguard';
-import { Permissions } from 'src/shared/shared.permissions.decorator';
-import { Permission } from 'src/shared/shared.permission.enum';
-
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
@@ -81,5 +78,11 @@ export class UserController {
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized access' })
     getProfile(@Request() req) {
         return this.userService.getProfile(req);
+    }
+
+    @UseGuards(AuthGuard)
+    @Post("familyHeads")
+    async addFamilyHeads(@Body() invitationRequest: InviteFamilyHeadDto , @Req() req ): Promise<{message:string}> {
+        return await this.userService.addFamilyHeads(invitationRequest, req.user.email);
     }
 }

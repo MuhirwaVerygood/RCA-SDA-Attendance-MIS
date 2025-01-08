@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import { SharedModule } from 'src/shared/shared.module';
+import { FamiliesService } from 'src/families/families.service';
 
 @Module({
     imports: [
@@ -16,6 +17,6 @@ import { SharedModule } from 'src/shared/shared.module';
     ],
     exports:[TypeOrmModule],
     controllers: [MembersController],
-    providers:[MembersService, UserService]
+    providers:[MembersService, UserService , FamiliesService]
 })
 export class MembersModule {}

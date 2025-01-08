@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { Family } from 'src/families/families.entity';
 import { Member } from 'src/members/members.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Global() 
 @Module({
@@ -36,7 +37,21 @@ import { Member } from 'src/members/members.entity';
             }),
 
         }),
+
+        MailerModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                transport: {
+                    host: configService.get<string>('EMAIL_HOST'),
+                    auth: {
+                        user: configService.get<string>('EMAIL_USERNAME'),
+                        pass: configService.get<string>('EMAIL_PASSWORD'),
+                    },
+                },
+            }),
+        }),
     ],
-    exports: [JwtModule, TypeOrmModule],
+    exports: [JwtModule, TypeOrmModule , MailerModule],
 })
 export class SharedModule { }

@@ -4,13 +4,18 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
+import { InviteFamilyHeadDto } from './user.dto';
+import { FamiliesService } from 'src/families/families.service';
+import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class UserService {
   
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly familyService: FamiliesService,
+        private readonly mailerService: MailerService
     ) { }
 
     
@@ -56,4 +61,56 @@ export class UserService {
         const { password, ...result } = req?.user;
         return result;
     }
+
+  
+    async addFamilyHeads(invitation: InviteFamilyHeadDto, currentAdminEmail: string): Promise<{ message: string }> {
+        const family = await this.familyService.getFamilyById(invitation.familyId);
+        if (!family) {
+            throw new HttpException('Family not found', HttpStatus.NOT_FOUND);
+        }
+
+        console.log(invitation.email);
+        
+        // Check if the user with this email already exists
+        const existingUser = await this.userRepository.findOne({ where: { email: invitation.email } });
+        if (existingUser) {
+            throw new HttpException('Family leader with this email already exists', HttpStatus.CONFLICT);
+        }
+
+        // Create the new user with the role (father or mother)
+        const newUser = await this.userRepository.create({
+            username: invitation.username,
+            email: invitation.email,
+            password: await bcrypt.hash(invitation.password, 10),
+            isFather: invitation.role === 'father',
+            isMother: invitation.role === 'mother',
+            isAdmin: false,
+            family: family,
+        });
+
+        // Save the new user
+        await this.userRepository.save(newUser);
+
+        // Get all admins
+        
+        const allAdmins = await this.userRepository.find({ where: { isAdmin: true } });
+        const otherAdmins = allAdmins.filter(admin => admin.email !== currentAdminEmail);
+
+        // Send email notifications to other admins
+        for (const admin of otherAdmins) {
+            const role = invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1);
+
+            // Send an email to each admin about the new family head
+            await this.mailerService.sendMail({
+                to: admin.email,
+                subject: 'New Family Head Added',
+                text: `Dear Admin, \n\nThis is to inform you that the admin ${currentAdminEmail} has added ${invitation.username} as a ${role} of the family: ${family.familyName}. \n\nBest regards,\nYour Admin Team`,
+            });
+        }
+
+        return {
+            message: `${invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)} added successfully`,
+        };
+    }
+
 }

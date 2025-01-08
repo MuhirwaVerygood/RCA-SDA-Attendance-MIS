@@ -27,3 +27,12 @@ export class LoginUserDTO {
     @ApiProperty({ description: 'The password of the user', example: 'password123' })
     password: string;
 }
+
+
+export class InviteFamilyHeadDto {
+    role: 'mother' | 'father';
+    username: string;
+    email: string;
+    password: string;
+    familyId: number;
+}

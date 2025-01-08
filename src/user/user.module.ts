@@ -5,10 +5,12 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FamiliesService } from 'src/families/families.service';
+import { Family } from 'src/families/families.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([User, Family]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -24,6 +26,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
          
     exports:[TypeOrmModule],
     controllers: [UserController],
-    providers: [UserService],
+    providers: [UserService, FamiliesService],
 })
 export class UserModule { }

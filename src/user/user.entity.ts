@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Family } from 'src/families/families.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity('users') // Table name
 export class User {
@@ -22,5 +23,8 @@ export class User {
     
     @Column()
     isMother: boolean
+
+    @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'SET NULL' })
+    family: Family;
 }
 

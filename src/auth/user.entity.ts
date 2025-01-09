@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { Family } from 'src/families/families.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, IsNull } from 'typeorm';
 
@@ -24,8 +25,8 @@ export class User {
     @Column()
     isMother: boolean
 
-    @Column({nullable: true})
-    refreshToken: string
+    @Column({default:""})
+    refreshToken: string 
 
     @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'SET NULL' })
     family: Family;     

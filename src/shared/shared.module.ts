@@ -2,10 +2,10 @@ import { Module, Global } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/user.entity';
 import { Family } from 'src/families/families.entity';
 import { Member } from 'src/members/members.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { User } from 'src/auth/user.entity';
 
 @Global() 
 @Module({

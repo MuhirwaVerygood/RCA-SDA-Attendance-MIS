@@ -98,13 +98,23 @@ export class AuthService {
 
 
     async refreshTokens(req: any) {        
-        const user = await this.userRepository.findOne({where:{id: req.user.id}});
+        const user = await this.userRepository.findOne({
+            where: { id: req.user.id },
+            select: ['id', 'refreshToken'], 
+        });
+        console.log(user);
+        
         if (!user || !user.refreshToken)
+        
             throw new ForbiddenException('Access Denied');
+        
+
+        
         const refreshTokenMatches = await argon2.verify(
             user.refreshToken,
             req.user.refreshToken,
         );
+
         if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
         const tokens = await this.getTokens(user);
         await this.updateRefreshToken(user.id, tokens.refreshToken);

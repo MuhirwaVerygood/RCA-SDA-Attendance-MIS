@@ -4,11 +4,10 @@ import { MembersService } from './members.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Member } from './members.entity';
 import { Family } from 'src/families/families.entity';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/user.entity';
 import { SharedModule } from 'src/shared/shared.module';
 import { FamiliesService } from 'src/families/families.service';
+import { User } from 'src/auth/user.entity';
 
 @Module({
     imports: [

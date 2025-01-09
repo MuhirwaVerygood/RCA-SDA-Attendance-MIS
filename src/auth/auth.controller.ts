@@ -11,8 +11,8 @@ import {
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import {  LoginUserDTO } from './user.dto';
-import { User } from 'src/user/user.entity';
 import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
+import { User } from './user.entity';
 
 @Controller('auth')
 export class AuthController {

@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Family } from 'src/families/families.entity';
 import { Attendance } from './attendance.entity';
 import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/user.entity';
 import { FamiliesService } from 'src/families/families.service';
+import { User } from 'src/auth/user.entity';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Attendance, Family, User])],
@@ -14,4 +14,5 @@ import { FamiliesService } from 'src/families/families.service';
   providers: [AttendanceService, UserService, FamiliesService], 
   exports: [TypeOrmModule]
 })
+  
 export class AttendanceModule {}

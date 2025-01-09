@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Member } from "src/members/members.entity";
 import { Attendance } from "src/attendance/attendance.entity";
-import { User } from "src/user/user.entity";
+import { User } from "src/auth/user.entity";
 
 @Entity("families")
 export class Family {

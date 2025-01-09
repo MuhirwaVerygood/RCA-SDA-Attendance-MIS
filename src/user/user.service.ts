@@ -1,12 +1,12 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
-import { InviteFamilyHeadDto } from './user.dto';
 import { FamiliesService } from 'src/families/families.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { InviteFamilyHeadDto } from 'src/auth/user.dto';
 @Injectable()
 export class UserService {
   
@@ -22,6 +22,16 @@ export class UserService {
 
     async findById(id: number): Promise<User>{
         return this.userRepository.findOne({where:{id}})
+    }
+
+
+    async update(userId: number, updateData: any) {
+        const user = await this.userRepository.findOne({ where: { id: userId } })
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+        Object.assign(user, updateData)
+        return await this.userRepository.save(user);
     }
 
     async create(data: Partial<User>): Promise<any> {

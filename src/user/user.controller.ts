@@ -12,8 +12,8 @@ import {
 import { UserService } from './user.service';
 import { AuthGuard } from './auth.guard';
 import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { CreateUserDTO,  InviteFamilyHeadDto, LoginUserDTO } from './user.dto';
 import { RolesGuard } from 'src/shared/shared.roleguard';
+import { CreateUserDTO, InviteFamilyHeadDto, LoginUserDTO } from 'src/auth/user.dto';
 @ApiTags('Users')
 @Controller('users')
 export class UserController {

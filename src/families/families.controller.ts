@@ -16,6 +16,7 @@ import { FamiliesService } from './families.service';
 import { Family } from './families.entity';
 import { AuthGuard } from 'src/user/auth.guard';
 import { CreateFamilyDto, UpdateFamilyDto } from './families.dto';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @ApiTags('Families')
 @ApiBearerAuth()
@@ -33,7 +34,7 @@ export class FamiliesController {
         return this.familiesService.createFamily(familyName, father, mother);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get()
     @ApiOperation({ summary: 'Get all families' })
     @ApiResponse({ status: HttpStatus.OK, description: 'List of families retrieved successfully.', type: [Family] })

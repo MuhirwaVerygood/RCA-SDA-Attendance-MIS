@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user/user.service';
 import { SharedModule } from './shared/shared.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { AttendanceModule } from './attendance/attendance.module';
     MembersModule,
     SharedModule,
     SharedModule,
-    AttendanceModule
+    AttendanceModule,
+    AuthModule
   ],
   controllers: [AppController, FamiliesController, MembersController],
   providers: [AppService, MembersService, FamiliesService, JwtService, UserService],

@@ -190,7 +190,6 @@ export class AttendanceService {
 
 
     async getAttendancesByDate(date: Date): Promise<Attendance[]> {
-        console.log(date);
         return await this.attendanceRepository.find({ where: { date }, relations:["family"] });
     }
 }

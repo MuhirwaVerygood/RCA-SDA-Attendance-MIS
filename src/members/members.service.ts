@@ -32,7 +32,7 @@
         }
 
         async getAllMembers(): Promise<Member[]>{
-            return this.memberRepository.find()
+            return this.memberRepository.find({relations:["family"]})
         }
 
         // Get a single member by ID

@@ -110,4 +110,14 @@ export class AttendanceController {
     async addGeneralAttendanceByForm(@Body() generalAttendance: AttendanceSummaryDto): Promise<{message: string}> {
         return this.attendanceService.addGeneralAttendanceByForm(generalAttendance);
     }
+
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Permissions(Permission.ViewGeneralAttendance)    
+    @Get("/:date")
+    async getAttendancesByDate(
+        @Param('date') date: Date
+    ) {
+    return this.attendanceService.getAttendancesByDate(date)
+    }
 }

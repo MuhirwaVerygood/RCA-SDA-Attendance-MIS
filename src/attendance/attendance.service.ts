@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { AddAttendanceByFamilyDto, AttendanceSummaryDto } from './attendance.dto';
 import { FamiliesService } from 'src/families/families.service';
 import { getPreviousSabbathDate, getSaturdayOccurrence,  } from './sabbathAttendance.utils';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AttendanceService {
@@ -12,7 +13,8 @@ export class AttendanceService {
     constructor(
         @InjectRepository(Attendance)
         private readonly attendanceRepository: Repository<Attendance>,
-        private readonly familiesService: FamiliesService
+        private readonly familiesService: FamiliesService,
+        private readonly userService : UserService
     ) { }
 
     // Method to calculate total attendance for each category on a given day (Sabbath)
@@ -93,9 +95,21 @@ export class AttendanceService {
         return groupedAttendances;
     } 
 
-    async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto) :  Promise<{message: string}>{
-        const {   attendanceDetails } = addAttendanceByFamilyDto;
-        const family = await this.familiesService.getFamilyById(familyId);
+    async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto, req: any) :  Promise<{message: string}>{
+        
+        const user = await this.userService.getProfile(req);
+            
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        if ( user.family.id!= familyId) {
+            throw new BadRequestException("You are not authorized to add attendance for this family");
+        }
+
+        const family = await this. familiesService.getFamilyById(familyId);
+        const { attendanceDetails } = addAttendanceByFamilyDto;
+
         const abanditswe = family.members.length;
         if (!family) {
             throw new NotFoundException(`Family with id: ${familyId} does not exist`)
@@ -114,6 +128,15 @@ export class AttendanceService {
 
         const date = new Date(Date.now())
         const sabbathDate = getPreviousSabbathDate(date);
+
+        const existingAttendance = await this.attendanceRepository.findOne({
+            where: { family: { id: familyId }, date: sabbathDate },
+        });
+
+        if (existingAttendance) {
+            await this.attendanceRepository.remove(existingAttendance);
+        }
+
         const attendance = this.attendanceRepository.create({
             abanditswe,
             family,
@@ -123,6 +146,7 @@ export class AttendanceService {
         });
 
         await this.attendanceRepository.save(attendance);
+
         return { message: "Attendance added successfully" }
     }
 
@@ -162,5 +186,10 @@ export class AttendanceService {
         });
 
         return {message : "Attendance added successfully"}
+    }
+
+
+    async getAttendancesByDate() {
+        
     }
 }

@@ -7,6 +7,7 @@ import {
     HttpStatus,
     Body,
     Post,
+    Req,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -48,7 +49,7 @@ export class AttendanceController {
     }
 
 
-    
+
     @UseGuards(AuthGuard)
     @Get('grouped')
     @HttpCode(HttpStatus.OK)
@@ -97,8 +98,9 @@ export class AttendanceController {
     async addAttendanceByFamily(
         @Param("familyId") familyId: number,
         @Body() addAttendanceByFamilyDto: AddAttendanceByFamilyDto,
+        @Req() req
     ): Promise<{ message: string }> {
-        return this.attendanceService.addAttendanceByFamily(familyId,addAttendanceByFamilyDto);
+        return this.attendanceService.addAttendanceByFamily(familyId,addAttendanceByFamilyDto, req);
     }
 
 

@@ -25,6 +25,6 @@ export class User {
     isMother: boolean
 
     @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'SET NULL' })
-    family: Family;
+    family: Family;     
 }
 

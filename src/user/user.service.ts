@@ -58,8 +58,9 @@ export class UserService {
         }
     }
 
-    getProfile(req: any) {
-        const { password, ...result } = req?.user;
+    async getProfile(req: any) {
+        const userExists = await this.userRepository.findOne({ where: { id: req.user.id } , relations: ["family"] });
+        const { password, ...result } = userExists;
         return result;
     }
 

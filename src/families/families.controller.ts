@@ -14,7 +14,6 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FamiliesService } from './families.service';
 import { Family } from './families.entity';
-import { AuthGuard } from 'src/user/auth.guard';
 import { CreateFamilyDto, UpdateFamilyDto } from './families.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
@@ -24,7 +23,7 @@ import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 export class FamiliesController {
     constructor(private readonly familiesService: FamiliesService) { }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Post()
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Create a new family' })
@@ -42,7 +41,7 @@ export class FamiliesController {
         return this.familiesService.getAllFamilies();
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get(':id')
     @ApiOperation({ summary: 'Get a family by ID' })
     @ApiParam({ name: 'id', description: 'Unique ID of the family', example: 1 })
@@ -56,7 +55,7 @@ export class FamiliesController {
         return family;
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Put(':id')
     @ApiOperation({ summary: 'Update family details' })
     @ApiParam({ name: 'id', description: 'Unique ID of the family to update', example: 1 })
@@ -67,7 +66,7 @@ export class FamiliesController {
         return this.familiesService.updateFamily(id, familyName, father, mother);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Delete(':id')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Delete a family' })

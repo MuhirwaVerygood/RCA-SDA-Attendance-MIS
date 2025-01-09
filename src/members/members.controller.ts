@@ -13,8 +13,8 @@ import {
 import { MembersService } from './members.service';
 import { CreateMemberDTO, UpdateMemberDTO } from './members.dto';
 import { Member } from './members.entity';
-import { AuthGuard } from 'src/user/auth.guard';
 import { ApiBearerAuth, ApiTags, ApiResponse, ApiParam, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Members')
@@ -22,7 +22,7 @@ import { ApiBearerAuth, ApiTags, ApiResponse, ApiParam, ApiBody, ApiOperation } 
 export class MembersController {
     constructor(private readonly membersService: MembersService) { }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Post(':familyId')
     @ApiOperation({ summary: 'Add a new member to a family' })    
     @ApiParam({ name: 'familyId', description: 'The ID of the family', example: 1 })
@@ -36,7 +36,7 @@ export class MembersController {
         return this.membersService.addMemberToFamily(familyId, memberData);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get(':familyId')
     @ApiOperation({ summary: 'Delete a member by family ID' })
     @ApiParam({ name: 'familyId', description: 'The ID of the family', example: 1 })
@@ -46,7 +46,7 @@ export class MembersController {
         return this.membersService.getMembersByFamily(familyId);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get()
     @ApiOperation({ summary: 'Get all members' })    
     @ApiResponse({ status: HttpStatus.OK, description: 'List of all members retrieved successfully' })
@@ -54,7 +54,7 @@ export class MembersController {
         return this.membersService.getAllMembers();
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get('member/:memberId')
     @ApiParam({ name: 'memberId', description: 'The ID of the member', example: 1 })
     @ApiOperation({ summary: 'Get a member by member ID' })    
@@ -64,7 +64,7 @@ export class MembersController {
         return this.membersService.getMemberById(memberId);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Put('member/:memberId')
     @ApiParam({ name: 'memberId', description: 'The ID of the member', example: 1 })
     @ApiOperation({ summary: 'Update a member by member ID' })    
@@ -78,7 +78,7 @@ export class MembersController {
         return this.membersService.updateMember(memberId, updateData);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Delete('member/:memberId')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Delete a member by member ID' })      

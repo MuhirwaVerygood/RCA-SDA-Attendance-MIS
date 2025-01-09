@@ -10,10 +10,11 @@ import {
     Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthGuard } from './auth.guard';
+
 import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RolesGuard } from 'src/shared/shared.roleguard';
 import { CreateUserDTO, InviteFamilyHeadDto, LoginUserDTO } from 'src/auth/user.dto';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
@@ -58,7 +59,7 @@ export class UserController {
 
     @ApiOperation({ summary: 'Get a user profile' })
 
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Get('profile')
     @ApiBearerAuth()
     @ApiResponse({
@@ -80,9 +81,10 @@ export class UserController {
         return this.userService.getProfile(req);
     }
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Post("familyHeads")
     async addFamilyHeads(@Body() invitationRequest: InviteFamilyHeadDto , @Req() req ): Promise<{message:string}> {
         return await this.userService.addFamilyHeads(invitationRequest, req);
     }
 }
+ 

@@ -17,11 +17,11 @@ import {
     ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AttendanceService } from './attendance.service';
-import { AuthGuard } from 'src/user/auth.guard';
 import { AddAttendanceByFamilyDto, AttendanceSummaryDto, GroupedAttendanceDto } from './attendance.dto';
 import { RolesGuard } from 'src/shared/shared.roleguard';
 import { Permission } from 'src/shared/shared.permission.enum';
 import { Permissions } from 'src/shared/shared.permissions.decorator';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @ApiTags('Attendances')
 @ApiBearerAuth()
@@ -29,7 +29,7 @@ import { Permissions } from 'src/shared/shared.permissions.decorator';
 export class AttendanceController {
     constructor(private readonly attendanceService: AttendanceService) { }
 
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Permissions(Permission.ViewGeneralAttendance)
     @Get('total/:date')
     @HttpCode(HttpStatus.OK)
@@ -50,7 +50,7 @@ export class AttendanceController {
 
 
 
-    @UseGuards(AuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get('grouped')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Get grouped attendance data by date' })
@@ -64,7 +64,7 @@ export class AttendanceController {
     }
 
 
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Permissions(Permission.AddFamilyAttendance)
     @Post("/:familyId")
     @HttpCode(HttpStatus.CREATED)
@@ -104,7 +104,7 @@ export class AttendanceController {
     }
 
 
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Permissions(Permission.AddGeneralAttendance)    
     @Post("general/form")
     async addGeneralAttendanceByForm(@Body() generalAttendance: AttendanceSummaryDto): Promise<{message: string}> {
@@ -112,7 +112,7 @@ export class AttendanceController {
     }
 
 
-    @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Permissions(Permission.ViewGeneralAttendance)    
     @Get("/:date")
     async getAttendancesByDate(

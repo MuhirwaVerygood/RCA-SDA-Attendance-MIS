@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {  ConflictException, ForbiddenException, Injectable, Res, UnauthorizedException } from '@nestjs/common';
+import { Response } from 'express';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -39,17 +40,22 @@ export class AuthService {
         return tokens;
     }
 
-    async signIn(data: LoginUserDTO) {
+    async signIn(data: LoginUserDTO, @Res() res: Response) : Promise<any>{
+        
         const user = await this.userRepository.findOne({where:{email : data.email}});        
         if (!user) throw new UnauthorizedException('Invalid password or email');
         const passwordMatches = await argon2.verify(user.password, data.password);
         if (!passwordMatches)
             throw new UnauthorizedException('Invalid password or email');
-        const tokens = await this.getTokens(user );
+        const tokens = await this.getTokens(user);
+
+
         await this.updateRefreshToken(user.id, tokens.refreshToken);
-        const { password, ...userWithoutPassword } = user;
-        return { message: "Logged in successfully", tokens, user: userWithoutPassword};
-    }
+
+        const {password, ...userWithoutPassword} = user;
+        return res.json({message:"Login Successful" , user: userWithoutPassword , tokens});
+        }
+
 
     async logout(req: any) {
         return this.usersService.update(req.user.id, { refreshToken: null });
@@ -97,12 +103,11 @@ export class AuthService {
     }
 
 
-    async refreshTokens(req: any) {        
+    async refreshTokens(req: any) {  
         const user = await this.userRepository.findOne({
             where: { id: req.user.id },
             select: ['id', 'refreshToken'], 
         });
-        console.log(user);
         
         if (!user || !user.refreshToken)
         

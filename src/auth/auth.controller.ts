@@ -2,10 +2,9 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -24,8 +23,8 @@ export class AuthController {
   }
 
   @Post('signin')
-  signin(@Body() data: LoginUserDTO) {
-    return this.authService.signIn(data);
+  signin(@Body() data: LoginUserDTO, @Res() res) {
+    return this.authService.signIn(data, res);
   }
 
   @Get('logout')

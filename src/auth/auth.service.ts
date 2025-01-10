@@ -1,5 +1,5 @@
 import {  ConflictException, ForbiddenException, Injectable, Res, UnauthorizedException } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -52,8 +52,14 @@ export class AuthService {
 
         await this.updateRefreshToken(user.id, tokens.refreshToken);
 
+        res.cookie('refreshToken', tokens.refreshToken)
+        res.cookie("accessToken", tokens.accessToken)
+
+        console.log(tokens);
+        
+
         const {password, ...userWithoutPassword} = user;
-        return res.json({message:"Login Successful" , user: userWithoutPassword , tokens});
+        return res.json({message:"Login Successful" , user: userWithoutPassword });
         }
 
 
@@ -102,27 +108,36 @@ export class AuthService {
         };
     }
 
+    async refreshTokens(req: any) {        
+        console.log(req.cookies); 
+        const refreshToken = req.cookies?.refreshToken;
 
-    async refreshTokens(req: any) {  
+        if (!req.user) {
+            throw new ForbiddenException('Access Denied: User information missing');
+        }
+
         const user = await this.userRepository.findOne({
             where: { id: req.user.id },
-            select: ['id', 'refreshToken'], 
+            select: ['id', 'refreshToken'],
         });
-        
-        if (!user || !user.refreshToken)
-        
-            throw new ForbiddenException('Access Denied');
-        
 
-        
+
+        if (!user || !user.refreshToken) {
+            throw new ForbiddenException('Access Denied: Invalid user or token');
+        }
+
         const refreshTokenMatches = await argon2.verify(
             user.refreshToken,
-            req.user.refreshToken,
+            refreshToken,
         );
 
-        if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+        if (!refreshTokenMatches) {
+            throw new ForbiddenException('Access Denied: Token mismatch');
+        }
+
         const tokens = await this.getTokens(user);
         await this.updateRefreshToken(user.id, tokens.refreshToken);
         return tokens;
     }
+
 }

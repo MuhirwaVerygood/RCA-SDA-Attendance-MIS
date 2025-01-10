@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Req,
   Res,
@@ -34,8 +36,10 @@ export class AuthController {
 
 
   @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
   @Get('refresh')
   refreshTokens(@Req() req: Request) {
+    
     return this.authService.refreshTokens(req);
   }
-}
+} 

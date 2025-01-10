@@ -2,11 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-
+  app.use(cookieParser());
+  
   const config = new DocumentBuilder()
     .setTitle('RCA-SDA Attendance MIS')
     .setDescription('The RCA-SDA Attendance API description')

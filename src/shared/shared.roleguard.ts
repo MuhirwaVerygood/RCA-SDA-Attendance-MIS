@@ -5,14 +5,22 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Permission } from './shared.permission.enum';
 import { RolesPermissions } from './shared.roles.permissions';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-    constructor(private reflector: Reflector) { }
+    constructor(
+        private reflector: Reflector,
+        private jwtService: JwtService,
+        private userService: UserService,
+        private configService: ConfigService, // Inject ConfigService
+    ) { }
 
-    canActivate(context: ExecutionContext): boolean {
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         // Get the required permissions from the handler
         const requiredPermissions = this.reflector.get<Permission[]>(
             'permissions',
@@ -23,21 +31,31 @@ export class RolesGuard implements CanActivate {
             return true; // No permissions required
         }
 
-        // Get the request and user profile
+        // Get the request object
         const request = context.switchToHttp().getRequest();
-        const user = request.user;
-        
-        
-        if (!user) {
-            throw new ForbiddenException('No user found in the request');
+        const accessToken = this.getTokenFromCookies(request);
+
+        if (!accessToken) {
+            throw new ForbiddenException('Access token not found in cookies');
         }
 
-        // Determine the user's roles
-        console.log(user);
-        
-        const userRoles = this.getUserRoles(user);
+        // Decode the token to get user details
+        let decoded: any;
+        try {
+            const jwtSecret = this.configService.get<string>('JWT_ACCESS_SECRET'); // Use ConfigService
+            decoded= this.jwtService.verify(accessToken, {
+                secret: jwtSecret,
+            });
+        } catch (err) {
+            throw new ForbiddenException('Invalid or expired access token');
+        }
 
-        
+        if (!decoded) {
+            throw new ForbiddenException('No user found in the decoded token');
+        }
+
+        const userRoles = await this.getUserRoles(decoded.id);        
+
         if (!userRoles.length) {
             throw new ForbiddenException('User has no valid roles');
         }
@@ -58,9 +76,17 @@ export class RolesGuard implements CanActivate {
     }
 
     /**
+     * Extract the token from cookies.
+     */
+    private getTokenFromCookies(request: any): string | null {
+        return request.cookies?.accessToken || null;
+    }
+
+    /**
      * Determine the roles of the logged-in user based on their profile.
      */
-    private getUserRoles(user: any): string[] {
+    async getUserRoles(userId: any): Promise<string[]> {
+        const user = await this.userService.findById(userId);
         const roles = [];
         if (user.isAdmin) roles.push('admin');
         if (user.isFather) roles.push('father');

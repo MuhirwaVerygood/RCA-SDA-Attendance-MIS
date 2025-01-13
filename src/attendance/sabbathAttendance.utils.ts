@@ -26,7 +26,6 @@ export const groupedBySabbath = attendances.reduce((group: Record<string, any[]>
     return group;
 }, {});
 
-console.log(groupedBySabbath);
 
 
 //Get sabbath nth in a month 
@@ -57,11 +56,3 @@ export const getSaturdayOccurrence = (date: string): number => {
     return occurrence;
 };
 
-// Example usage
-try {
-    const saturday = "2025-01-04T00:00:00Z"; // Example Saturday
-    const result = getSaturdayOccurrence(saturday);
-    console.log(result); // Output: "The provided Saturday is the 1st Saturday of the month."
-} catch (error) {
-    console.error(error.message);
-}

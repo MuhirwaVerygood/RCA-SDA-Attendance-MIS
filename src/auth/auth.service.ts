@@ -142,7 +142,6 @@ export class AuthService {
         }
 
        const newAccessToken  = await this.generateAccessToken(user)
-       console.log(newAccessToken);
             
         res.cookie("accessToken", newAccessToken ) 
         return res.json({access_token: newAccessToken})

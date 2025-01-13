@@ -2,11 +2,12 @@ import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt'
+import * as argon2 from 'argon2';
 import { FamiliesService } from 'src/families/families.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InviteFamilyHeadDto } from 'src/auth/user.dto';
 import { User } from 'src/auth/user.entity';
+
 @Injectable()
 export class UserService {
   
@@ -37,39 +38,9 @@ export class UserService {
         
     }
 
-    async create(data: Partial<User>): Promise<any> {
-        if (!data.isAdmin) {
-            throw new HttpException('Not allowed', HttpStatus.BAD_REQUEST);
-        }
-
-        const existingUser = await this.userRepository.findOne({ where: { email: data.email } });
-        if (existingUser) {
-            throw new HttpException('User with this email already exists', HttpStatus.CONFLICT);
-        }
-
-        const user = this.userRepository.create({
-            ...data,
-            password: await bcrypt.hash(data.password, 10),
-        });
-        const savedUser = await this.userRepository.save(user);
-        const { password, ...userWithoutPassword } = savedUser; 
-        return { message:"User registered successfully", user:userWithoutPassword};
-    }
+   
 
 
-    async login(data: Partial<User>): Promise<{message: string, token: string, user: object}>{
-        const userExists = await this.userRepository.findOne({ where: { email: data.email } })
-        if (!userExists) throw new HttpException("Invalid password or email", HttpStatus.UNAUTHORIZED);
-        const passwordMatches = await bcrypt.compare(data.password, userExists.password);
-        if (!passwordMatches)throw new HttpException("Invalid  password or email", HttpStatus.UNAUTHORIZED)
-        const payload = { id: userExists.id, isAdmin: userExists.isAdmin }
-        const {password, ...result} = userExists
-        return {
-            message: "Logged in successfuly",
-            user: result,
-            token: await this.jwtService.signAsync(payload)
-        }
-    }
 
     async getProfile(req: any) {
         const userExists = await this.userRepository.findOne({ where: { id: req.user.id } , relations: ["family"] });
@@ -96,7 +67,7 @@ export class UserService {
         const newUser = await this.userRepository.create({
             username: invitation.username,
             email: invitation.email,
-            password: await bcrypt.hash(invitation.password, 10),
+            password: await argon2.hash(invitation.password),
             isFather: invitation.role === 'father',
             isMother: invitation.role === 'mother',
             isAdmin: false,

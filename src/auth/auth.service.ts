@@ -1,5 +1,5 @@
 import {  ConflictException, ForbiddenException, Injectable, Res, UnauthorizedException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import {  Response } from 'express';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -40,9 +40,8 @@ export class AuthService {
         return tokens;
     }
 
-    async signIn(data: LoginUserDTO, @Res() res: Response) : Promise<any>{
-        
-        const user = await this.userRepository.findOne({where:{email : data.email}});        
+    async signIn(data: LoginUserDTO, @Res() res: Response) : Promise<any>{    
+        const user = await this.userRepository.findOne({where:{email : data.email} , relations:["family"]});        
         if (!user) throw new UnauthorizedException('Invalid password or email');
         const passwordMatches = await argon2.verify(user.password, data.password);
         if (!passwordMatches)
@@ -55,10 +54,8 @@ export class AuthService {
         res.cookie('refreshToken', tokens.refreshToken)
         res.cookie("accessToken", tokens.accessToken)
 
-        console.log(tokens);
         
-
-        const {password, ...userWithoutPassword} = user;
+        const {password, refreshToken,  ...userWithoutPassword} = user;
         return res.json({message:"Login Successful" , user: userWithoutPassword });
         }
 
@@ -84,6 +81,8 @@ export class AuthService {
                 {
                     id: user.id,
                     isAdmin: user.isAdmin,
+                    isFather: user.isFather,
+                    isMother: user.isMother,
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
@@ -94,6 +93,8 @@ export class AuthService {
                 {
                     id: user.id,
                     isAdmin: user.isAdmin,
+                    isFather: user.isFather,
+                    isMother: user.isMother,
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
@@ -108,10 +109,11 @@ export class AuthService {
         };
     }
 
-    async refreshTokens(req: any) {        
-        console.log(req.cookies); 
-        const refreshToken = req.cookies?.refreshToken;
 
+    async refreshTokens(req: any, @Res() res: Response) {        
+        const refreshToken = req.cookies?.refreshToken;
+        
+    
         if (!req.user) {
             throw new ForbiddenException('Access Denied: User information missing');
         }
@@ -125,19 +127,50 @@ export class AuthService {
         if (!user || !user.refreshToken) {
             throw new ForbiddenException('Access Denied: Invalid user or token');
         }
+    
+
 
         const refreshTokenMatches = await argon2.verify(
             user.refreshToken,
             refreshToken,
         );
 
+        
+    
         if (!refreshTokenMatches) {
             throw new ForbiddenException('Access Denied: Token mismatch');
         }
 
-        const tokens = await this.getTokens(user);
-        await this.updateRefreshToken(user.id, tokens.refreshToken);
-        return tokens;
+       const newAccessToken  = await this.generateAccessToken(user)
+       console.log(newAccessToken);
+            
+        res.cookie("accessToken", newAccessToken ) 
+        return res.json({access_token: newAccessToken})
+    }
+
+
+
+
+    async generateAccessToken(user: {
+        id: number;
+        isAdmin: boolean;
+        isFather: boolean;
+        isMother: boolean;
+    }): Promise<string> {
+        const accessToken = await this.jwtService.signAsync(
+            {
+                id: user.id,
+                isAdmin: user.isAdmin,
+                isFather: user.isFather,
+                isMother: user.isMother,
+            },
+            {
+                secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+                expiresIn: '15m',
+            },
+        );
+
+        return accessToken;
     }
 
 }

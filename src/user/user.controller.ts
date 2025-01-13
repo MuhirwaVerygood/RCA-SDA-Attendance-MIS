@@ -11,54 +11,17 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 
-import { ApiTags, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags,  ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RolesGuard } from 'src/shared/shared.roleguard';
-import { CreateUserDTO, InviteFamilyHeadDto, LoginUserDTO } from 'src/auth/user.dto';
+import {  InviteFamilyHeadDto} from 'src/auth/user.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
-    @Post('signup')
-    @ApiOperation({ summary: 'Register a user' })    
-    @ApiBody({ type: CreateUserDTO })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'User successfully registered' })
-    @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user with that email already exists' })
-    async create(@Body() data: CreateUserDTO): Promise<any> {
-        return this.userService.create(data);
-    }
-
-    @Post('signin')
-    @HttpCode(200)
-    @ApiBody({ type: LoginUserDTO })
-    @ApiOperation({ summary: 'Login a user' })    
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'Logged in successfully',
-        schema: {
-            example: {
-                message: 'Logged in successfully',
-                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-                user: {
-                    id: 1,
-                    username: 'johndoe',
-                    email: 'user@example.com',
-                    isAdmin: false,
-                    isFather: false,
-                    isMother: true,
-                },
-            },
-        },
-    })
-        
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid password or email' })
-    async login(@Body() data: LoginUserDTO): Promise<{ message: string; token: string; user: object }> {
-        return this.userService.login(data);
-    }
 
     @ApiOperation({ summary: 'Get a user profile' })
-
     @UseGuards(AccessTokenGuard, RolesGuard)
     @Get('profile')
     @ApiBearerAuth()

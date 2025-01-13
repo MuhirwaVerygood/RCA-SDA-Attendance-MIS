@@ -7,6 +7,8 @@ import { Request } from 'express';
 type JwtPayload = {
     id: number;
     isAdmin: boolean;
+    isFather: boolean;
+    isMother: boolean;
 };
 
 @Injectable()

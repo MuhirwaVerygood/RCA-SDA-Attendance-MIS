@@ -61,7 +61,7 @@ export class AuthService {
 
 
     async logout(req: any) {
-        return this.usersService.update(req.user.id, { refreshToken: null });
+        return this.usersService.update(req.user.id, { refreshToken: "" });
     }
 
     hashData(data: string) {

@@ -15,6 +15,7 @@ import { CreateUserDTO, LoginUserDTO } from './user.dto';
 import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { User } from './user.entity';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -58,6 +59,8 @@ export class AuthController {
     return this.authService.signIn(data, res);
   }
 
+
+  @UseGuards(AccessTokenGuard )
   @Get('logout')
   logout(@Req() req: Request) {
     this.authService.logout(req);

@@ -13,6 +13,31 @@ export class CreateFamilyDto {
     @ApiProperty({ example: 'Jane Smith', description: 'The mother of the family' })
     @IsString()
     mother: string;
+
+
+
+
+    @ApiProperty({ example: 'janesmith@gmail.com', description: 'The email of mother of the family' })
+    @IsString()
+    mother_email: string;
+    
+    @ApiProperty({ example: 'verygoodmuhirwa@gmail.com', description: 'The email of father of the family' })
+    @IsString()
+    father_email: string;
+
+
+    @ApiProperty({ example: 'Y2D', description: 'The class of father of the family' })
+    @IsString()
+    father_class: string;
+
+    @ApiProperty({ example: 'Y2D', description: 'The class of mother of the family' })
+    @IsString()
+    mother_class: string;
+
+
+    @ApiProperty({ example: 'verygoodmuhirwa235', description: 'The initial password for family heads' })
+    @IsString()
+    password: string;
 }
 
 

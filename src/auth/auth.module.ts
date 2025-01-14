@@ -11,11 +11,12 @@ import { FamiliesService } from 'src/families/families.service';
 import { Family } from 'src/families/families.entity';
 import { SharedModule } from 'src/shared/shared.module';
 import { ConfigModule } from '@nestjs/config';
+import { Member } from 'src/members/members.entity';
 
 @Module({
   imports: [
     JwtModule.register({}),
-    TypeOrmModule.forFeature([User, Family]),
+    TypeOrmModule.forFeature([User, Family ,  Member]),
     ConfigModule.forRoot({isGlobal: true}),
   ],
   controllers: [AuthController],

@@ -62,7 +62,7 @@ export class AuthService {
 
     async logout(req: any) {
         return this.usersService.update(req.user.id, { refreshToken: "" });
-    }
+    }   
 
     hashData(data: string) {
         return argon2.hash(data);

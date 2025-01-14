@@ -28,9 +28,8 @@ export class FamiliesController {
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Create a new family' })
     @ApiResponse({ status: HttpStatus.CREATED, description: 'Family created successfully.', type: Family })
-    async createFamily(@Body() createFamilyDto: CreateFamilyDto): Promise<Family> {
-        const { familyName, father, mother } = createFamilyDto;
-        return this.familiesService.createFamily(familyName, father, mother);
+    async createFamily(@Body() familyRequest: CreateFamilyDto): Promise<object> {
+        return this.familiesService.createFamily(familyRequest);
     }
 
     @UseGuards(AccessTokenGuard)

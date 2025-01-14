@@ -7,10 +7,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FamiliesService } from 'src/families/families.service';
 import { Family } from 'src/families/families.entity';
 import { User } from 'src/auth/user.entity';
+import { Member } from 'src/members/members.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Family]),
+        TypeOrmModule.forFeature([User, Family , Member]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

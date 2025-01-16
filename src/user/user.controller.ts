@@ -8,6 +8,7 @@ import {
     HttpCode,
     HttpStatus,
     Req,
+    Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 
@@ -15,6 +16,15 @@ import { ApiTags,  ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swag
 import { RolesGuard } from 'src/shared/shared.roleguard';
 import {  InviteFamilyHeadDto} from 'src/auth/user.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { Request as Rq } from 'express';
+
+
+interface CustomRequest extends Rq {
+    user?: {
+        id: number;
+    };
+}
+
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
@@ -48,6 +58,11 @@ export class UserController {
     @Post("familyHeads")
     async addFamilyHeads(@Body() invitationRequest: InviteFamilyHeadDto , @Req() req ): Promise<{message:string}> {
         return await this.userService.addFamilyHeads(invitationRequest, req);
+    }
+
+    @Put("/profile")
+    async updateProfile(@Body() userData: any, @Req() req: CustomRequest) {
+                return this.userService.update(req?.user?.id, userData)
     }
 }
  

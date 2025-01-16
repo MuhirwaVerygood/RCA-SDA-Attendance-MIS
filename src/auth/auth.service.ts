@@ -31,6 +31,7 @@ export class AuthService {
         const newUser = await this.userRepository.create({
             ...createUserDto,
             password: hash,
+            profileName: createUserDto.username
         });
 
         await this.userRepository.save(newUser)
@@ -48,7 +49,6 @@ export class AuthService {
             throw new UnauthorizedException('Invalid password or email');
         const tokens = await this.getTokens(user);
 
-
         await this.updateRefreshToken(user.id, tokens.refreshToken);
 
         res.cookie('refreshToken', tokens.refreshToken)
@@ -61,7 +61,7 @@ export class AuthService {
 
 
     async logout(req: any) {
-        return this.usersService.update(req.user.id, { refreshToken: "" });
+        return this.usersService.update(req.user.id, { refreshToken: null });
     }   
 
     hashData(data: string) {

@@ -35,7 +35,6 @@ export class UserService {
         Object.assign(user, updateData)        
         const savedUser = await this.userRepository.save(user);
         return savedUser;
-        
     }
 
    

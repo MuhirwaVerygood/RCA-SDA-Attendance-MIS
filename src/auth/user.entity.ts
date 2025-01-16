@@ -25,7 +25,17 @@ export class User {
     @Column()
     isMother: boolean
 
+
+    @Column({ default: "" })
+     post: string   
+
     @Column({default:""})
+    profileName: string
+
+    @Column({ default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg" })
+    image: string
+
+    @Column({nullable: true})
     refreshToken: string 
 
     @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'SET NULL' })

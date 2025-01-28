@@ -53,4 +53,8 @@ pids
 *.pid.lock
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
+<<<<<<< HEAD
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+=======
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+>>>>>>> 60e13674c0e9fbf2af4ee578d621118398540c06

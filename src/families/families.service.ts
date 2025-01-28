@@ -7,12 +7,17 @@ import * as argon2 from "argon2"
 import { User } from 'src/auth/user.entity';
 import { Member } from 'src/members/members.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Attendance } from 'src/attendance/attendance.entity';
 
 @Injectable()
 export class FamiliesService {
     constructor(
         @InjectRepository(Family)
         private readonly familyRepository: Repository<Family>,
+
+
+        @InjectRepository(Attendance)
+        private readonly attendanceRepository: Repository<Attendance>,
 
         @InjectRepository(Member)
         private readonly  memberRepository : Repository<Member> ,
@@ -83,11 +88,7 @@ export class FamiliesService {
         return family;
     }
 
-    // Get all families
-    async getAllFamilies(): Promise<Family[]> {
-        return this.familyRepository.find({ relations: ['members' , 'attendances'] });
-    }   
-
+   
     // Get a family by ID
     async getFamilyById(id: number): Promise<Family> {
         const family = await this.familyRepository.findOne({
@@ -124,5 +125,54 @@ export class FamiliesService {
 
         await this.familyRepository.delete(id);
         return {message:"Family Deleted Successfully"}
+    }
+
+
+
+     // Get all families
+     async getAllFamilies(): Promise<Family[]> {
+        const families = await this.familyRepository.find({ relations: ['members' , 'attendances'] });
+        if(!families){
+            throw new NotFoundException("Not families found")
+        }
+        
+        const familiesWithActiveMembers = await Promise.all(families.map(async(family)=>{
+            const activeMembers = await this.calculateActiveMembersForFamily(family);
+            return {
+                ...family, 
+                activeMembers
+            }
+        }))
+        
+        return familiesWithActiveMembers;
+    }   
+
+
+
+    private async calculateActiveMembersForFamily(family: Family): Promise<number> {
+        // Get the most recent attendance record for the family
+        const recentAttendance = await this.attendanceRepository
+            .createQueryBuilder('attendance')
+            .where('attendance.familyId = :familyId', { familyId: family.id })
+            .orderBy('attendance.date', 'DESC') // Sort by date in descending order to get the most recent
+            .getOne();
+
+        if (!recentAttendance) {
+            return 0; // If no attendance record is found, return 0 active members
+        }
+
+        // Calculate active members based on the most recent attendance record
+        let activeMembersCount = 0;
+
+        // Check attendance status and count active members
+        if (
+            recentAttendance.abaje || // Those who attended
+            recentAttendance.abarwayi || // Those marked as sick
+            recentAttendance.abafiteImpamvu // Those with valid excuses
+        ) {
+            activeMembersCount++;
+        }
+
+        return activeMembersCount;
     }
 }

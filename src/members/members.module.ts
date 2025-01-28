@@ -8,10 +8,11 @@ import { UserService } from 'src/user/user.service';
 import { SharedModule } from 'src/shared/shared.module';
 import { FamiliesService } from 'src/families/families.service';
 import { User } from 'src/auth/user.entity';
+import { Attendance } from 'src/attendance/attendance.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Member, Family, User]),
+        TypeOrmModule.forFeature([Member, Family, User , Attendance]),
         SharedModule
     ],
     exports:[TypeOrmModule],

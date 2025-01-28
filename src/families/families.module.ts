@@ -7,13 +7,15 @@ import { UserService } from 'src/user/user.service';
 import { SharedModule } from 'src/shared/shared.module';
 import { User } from 'src/auth/user.entity';
 import { Member } from 'src/members/members.entity';
+import { Attendance } from 'src/attendance/attendance.entity';
+import { AttendanceService } from 'src/attendance/attendance.service';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Family, User, Member]),
+        TypeOrmModule.forFeature([Family, User, Member , Attendance]),
         SharedModule
     ],
-    providers: [FamiliesService, UserService],
+    providers: [FamiliesService, UserService , AttendanceService],
     controllers: [FamiliesController],
     exports:[TypeOrmModule]
 })

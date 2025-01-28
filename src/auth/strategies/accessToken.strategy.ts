@@ -14,12 +14,8 @@ type JwtPayload = {
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(private readonly configService: ConfigService) {
-<<<<<<< HEAD
         const secret = configService.get<string>('JWT_ACCESS_SECRET', "HELLLO");
         
-=======
-        const secret = configService.get<string>('JWT_ACCESS_SECRET');
->>>>>>> 60e13674c0e9fbf2af4ee578d621118398540c06
 
         super({
             jwtFromRequest: (req: Request) => {

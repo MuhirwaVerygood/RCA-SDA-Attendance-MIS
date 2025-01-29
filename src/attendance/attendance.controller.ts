@@ -65,6 +65,14 @@ export class AttendanceController {
 
 
     @UseGuards(AccessTokenGuard, RolesGuard)
+    @Permissions(Permission.AddGeneralAttendance)
+    @Post("/general/table")
+    async addGeneralAttendanceByTable( @Body() req: any ){
+        return this.attendanceService.addChurchAttendance(req);
+    }
+
+
+    @UseGuards(AccessTokenGuard, RolesGuard)
     @Permissions(Permission.AddFamilyAttendance)
     @Post("/:familyId")
     @HttpCode(HttpStatus.CREATED)
@@ -120,4 +128,8 @@ export class AttendanceController {
     ) {
     return this.attendanceService.getAttendancesByDate(date)
     }
+
+
+
+    
 }

@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsDate, IsInt, IsISO8601, IsOptional, Min } from "class-validator";
+import { IsInt,  IsOptional, Min } from "class-validator";
 
 export class AttendanceSummaryDto {
     @IsOptional()

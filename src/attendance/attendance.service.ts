@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Attendance } from './attendance.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { AddAttendanceByFamilyDto, AttendanceSummaryDto } from './attendance.dto
 import { FamiliesService } from 'src/families/families.service';
 import { getPreviousSabbathDate, getSaturdayOccurrence,  } from './sabbathAttendance.utils';
 import { UserService } from 'src/user/user.service';
+import { Member } from 'src/members/members.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -13,6 +14,8 @@ export class AttendanceService {
     constructor(
         @InjectRepository(Attendance)
         private readonly attendanceRepository: Repository<Attendance>,
+        @InjectRepository(Member)
+        private readonly memberRepository : Repository<Member>,
         private readonly familiesService: FamiliesService,
         private readonly userService : UserService
     ) { }
@@ -97,7 +100,6 @@ export class AttendanceService {
     async addAttendanceByFamily( familyId: number, addAttendanceByFamilyDto: AddAttendanceByFamilyDto, req: any) :  Promise<{message: string}>{
         
         const user = await this.userService.getProfile(req);
-            
         if (!user) {
             throw new NotFoundException("User not found");
         }
@@ -148,6 +150,85 @@ export class AttendanceService {
 
         return { message: "Attendance added successfully" }
     }
+
+
+
+    async addChurchAttendance(attendanceRequest: { attendances: any[]; abashyitsi: number }): Promise<{ message: string }> {
+        console.log(attendanceRequest);
+    
+        if (!Array.isArray(attendanceRequest.attendances)) {
+            throw new BadRequestException("Invalid attendance data");
+        }
+    
+        const sabbathDate = getPreviousSabbathDate(new Date());
+    
+        // Remove existing attendance records for the given Sabbath date
+        const existingAttendance = await this.attendanceRepository.find({ where: { date: sabbathDate } });
+        if (existingAttendance.length > 0) {
+            await this.attendanceRepository.remove(existingAttendance);
+        }
+    
+        // Get all families
+        const allFamilies = await this.familiesService.getAllFamilies();
+    
+        // Process attendance for each member
+        for (const member of attendanceRequest.attendances) {
+            // Find the family containing the member
+            const familyContainingMember = allFamilies.find(family =>
+                family.members.some(a => a.id === member.memberId)
+            );
+    
+            if (!familyContainingMember) {
+                console.warn(`No family found for member with ID: ${member.memberId}`);
+                continue;
+            }
+    
+            // Find or create attendance for the family on the given Sabbath date
+            let attendanceByFamily = await this.attendanceRepository.findOne({
+                where: { family: {id : familyContainingMember.id }, date: sabbathDate },
+                relations:["family" ]
+            });
+
+
+    
+            if (!attendanceByFamily) {
+                attendanceByFamily = this.attendanceRepository.create({
+                    date: sabbathDate,
+                    family: familyContainingMember,
+                    abanditswe: familyContainingMember.members.length,
+                    abaje: 0,
+                    abasuye: 0,
+                    abasuwe: 0,
+                    abafashije: 0,
+                    abafashijwe: 0,
+                    abatangiyeIsabato: 0,
+                    abize7: 0,
+                    abarwayi: 0,
+                    abafiteImpamvu: 0,
+                });
+            }
+    
+            // Increment attendance fields based on the member's data
+            if (member.yaje) attendanceByFamily.abaje += 1;
+            if (member.yarasuye) attendanceByFamily.abasuye += 1;
+            if (member.yarasuwe) attendanceByFamily.abasuwe += 1;
+            if (member.yarafashije) attendanceByFamily.abafashije += 1;
+            if (member.yarafashijwe) attendanceByFamily.abafashijwe += 1;
+            if (member.yatangiyeIsabato) attendanceByFamily.abatangiyeIsabato += 1;
+            if (member.yize7) attendanceByFamily.abize7 += 1;
+            if (member.ararwaye) attendanceByFamily.abarwayi += 1;
+            if (member.afiteIndiMpamvu) attendanceByFamily.abafiteImpamvu += 1;
+    
+            // Save attendance for the family
+            await this.attendanceRepository.save(attendanceByFamily);
+            console.log(attendanceByFamily);
+            
+        }
+    
+        return { message: "Attendance recorded successfully" };
+    }
+    
+
 
 
     async addGeneralAttendanceByForm(attendanceSummary: AttendanceSummaryDto) : Promise <{message: string}>{

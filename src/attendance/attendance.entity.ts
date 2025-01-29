@@ -8,24 +8,28 @@ export class Attendance{
     id: number
     @Column()
     abanditswe: number
-    @Column()
+    @Column( {default: 0} )
     abaje: number
-    @Column()
+    @Column({default: 0} )
+    
     abasuye: number
-    @Column()
+    @Column({default: 0} )
     abasuwe: number
-    @Column()
+    @Column({default: 0} )
     abafashije: number
-    @Column()
+    @Column({default: 0} )
     abafashijwe: number
-    @Column()
+    @Column({default: 0} )
     abatangiyeIsabato: number
-    @Column()
+    @Column({default: 0} )
     abarwayi: number
-    @Column()
+    @Column({default: 0} )
     abafiteImpamvu: number
 
-    @Column()
+    @Column({default: 0} )
+    abize7: number
+
+    @Column({default: 0} )
     abashyitsi: number
 
     @Column({ type: "date" })

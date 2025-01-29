@@ -37,7 +37,7 @@ export class User {
     @Column({nullable: true})
     refreshToken: string 
 
-    @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'SET NULL' })
+    @ManyToOne(() => Family, (family) => family.heads, { nullable: true, onDelete: 'CASCADE' })
     family: Family;     
 }
 

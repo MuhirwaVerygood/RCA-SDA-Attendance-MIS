@@ -39,7 +39,7 @@ export class FamiliesService {
         const hashedPassword = await argon2.hash(password);
 
         // Reusable function for creating user accounts
-        const createUserAccount = async (username: string, email: string, isFather: boolean, isMother: boolean) => {
+        const createUserAccount = async (username: string, email: string, isFather: boolean, isMother: boolean , family: Family) => {
             const userAccount = this.userRepository.create({
                 username,
                 email,
@@ -47,15 +47,14 @@ export class FamiliesService {
                 isAdmin: false,
                 isFather,
                 isMother,
+                family
             });
 
 
             return this.userRepository.save(userAccount);
         };
 
-        // Create mother and father accounts
-        await createUserAccount(mother, mother_email, false, true);
-        await createUserAccount(father, father_email, true, false);
+    
 
         // Create the family record
         const family = this.familyRepository.create({
@@ -66,9 +65,15 @@ export class FamiliesService {
         
         await this.familyRepository.save(family);
 
+        
+
+        // Create mother and father accounts
+        await createUserAccount(mother, mother_email, false, true, family);
+        await createUserAccount(father, father_email, true, false, family);
+
         const motherAsMember = await this.memberRepository.create({ name: father, class: familyRequest.father_class, family })
         await this.memberRepository.save(motherAsMember)
-      const fatherAsMember =   await this.memberRepository.create({ name: mother, class: familyRequest.mother_class, family })
+      const fatherAsMember =  await this.memberRepository.create({ name: mother, class: familyRequest.mother_class, family })
         await this.memberRepository.save(fatherAsMember)
 
 
@@ -85,7 +90,12 @@ export class FamiliesService {
             });
         }
 
-        return family;
+        const familyWithRelations = await this.familyRepository.findOne({
+            where: { id: family.id },
+            relations: ['members', 'heads']
+        });
+    
+        return familyWithRelations;
     }
 
    
@@ -147,6 +157,8 @@ export class FamiliesService {
         return familiesWithActiveMembers;
     }   
 
+
+    
 
 
     private async calculateActiveMembersForFamily(family: Family): Promise<number> {

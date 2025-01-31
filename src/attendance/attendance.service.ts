@@ -154,8 +154,6 @@ export class AttendanceService {
 
 
     async addChurchAttendance(attendanceRequest: { attendances: any[]; abashyitsi: number }): Promise<{ message: string }> {
-        console.log(attendanceRequest);
-    
         if (!Array.isArray(attendanceRequest.attendances)) {
             throw new BadRequestException("Invalid attendance data");
         }
@@ -163,17 +161,15 @@ export class AttendanceService {
         const sabbathDate = getPreviousSabbathDate(new Date());
     
         // Remove existing attendance records for the given Sabbath date
-        const existingAttendance = await this.attendanceRepository.find({ where: { date: sabbathDate } });
-        if (existingAttendance.length > 0) {
-            await this.attendanceRepository.remove(existingAttendance);
-        }
+        await this.attendanceRepository.delete({ date: sabbathDate });
     
         // Get all families
         const allFamilies = await this.familiesService.getAllFamilies();
     
-        // Process attendance for each member
+        // Create a map to track attendance by family
+        const attendanceMap = new Map<number, Attendance>();
+    
         for (const member of attendanceRequest.attendances) {
-            // Find the family containing the member
             const familyContainingMember = allFamilies.find(family =>
                 family.members.some(a => a.id === member.memberId)
             );
@@ -183,13 +179,8 @@ export class AttendanceService {
                 continue;
             }
     
-            // Find or create attendance for the family on the given Sabbath date
-            let attendanceByFamily = await this.attendanceRepository.findOne({
-                where: { family: {id : familyContainingMember.id }, date: sabbathDate },
-                relations:["family" ]
-            });
-
-
+            // Check if the family already has an attendance entry in our map
+            let attendanceByFamily = attendanceMap.get(familyContainingMember.id);
     
             if (!attendanceByFamily) {
                 attendanceByFamily = this.attendanceRepository.create({
@@ -205,10 +196,12 @@ export class AttendanceService {
                     abize7: 0,
                     abarwayi: 0,
                     abafiteImpamvu: 0,
+                    abashyitsi: 0,
                 });
+                attendanceMap.set(familyContainingMember.id, attendanceByFamily);
             }
     
-            // Increment attendance fields based on the member's data
+            // Update attendance fields
             if (member.yaje) attendanceByFamily.abaje += 1;
             if (member.yarasuye) attendanceByFamily.abasuye += 1;
             if (member.yarasuwe) attendanceByFamily.abasuwe += 1;
@@ -218,17 +211,14 @@ export class AttendanceService {
             if (member.yize7) attendanceByFamily.abize7 += 1;
             if (member.ararwaye) attendanceByFamily.abarwayi += 1;
             if (member.afiteIndiMpamvu) attendanceByFamily.abafiteImpamvu += 1;
-    
-            // Save attendance for the family
-            await this.attendanceRepository.save(attendanceByFamily);
-            console.log(attendanceByFamily);
-            
         }
+    
+        // Save all attendance records at once
+        await this.attendanceRepository.save([...attendanceMap.values()]);
     
         return { message: "Attendance recorded successfully" };
     }
     
-
 
 
     async addGeneralAttendanceByForm(attendanceSummary: AttendanceSummaryDto) : Promise <{message: string}>{

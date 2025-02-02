@@ -160,31 +160,26 @@ export class FamiliesService {
 
     
 
-
     private async calculateActiveMembersForFamily(family: Family): Promise<number> {
-        // Get the most recent attendance record for the family
+        // Fetch the most recent attendance record for the family
         const recentAttendance = await this.attendanceRepository
             .createQueryBuilder('attendance')
             .where('attendance.familyId = :familyId', { familyId: family.id })
-            .orderBy('attendance.date', 'DESC') // Sort by date in descending order to get the most recent
+            .orderBy('attendance.date', 'DESC') // Sort by date in descending order
             .getOne();
-
+    
+    
         if (!recentAttendance) {
             return 0; // If no attendance record is found, return 0 active members
         }
-
-        // Calculate active members based on the most recent attendance record
-        let activeMembersCount = 0;
-
-        // Check attendance status and count active members
-        if (
-            recentAttendance.abaje || // Those who attended
-            recentAttendance.abarwayi || // Those marked as sick
-            recentAttendance.abafiteImpamvu // Those with valid excuses
-        ) {
-            activeMembersCount++;
-        }
-
+    
+        // Compute active members count
+        const activeMembersCount =
+            (recentAttendance.abaje || 0) + 
+            (recentAttendance.abarwayi || 0) + 
+            (recentAttendance.abafiteImpamvu || 0);
+    
         return activeMembersCount;
     }
+    
 }

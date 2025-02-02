@@ -28,7 +28,7 @@ export class Attendance{
 
     @Column({default: 0} )
     abize7: number
-
+    
     @Column({default: 0} )
     abashyitsi: number
 

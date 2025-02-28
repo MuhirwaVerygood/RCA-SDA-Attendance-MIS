@@ -31,6 +31,9 @@ import { User } from 'src/auth/user.entity';
                 username: configService.get<string>('DB_USERNAME', 'postgres'),
                 password: configService.get<string>('DB_PASSWORD', 'password'),
                 database: configService.get<string>('DB_NAME', 'test'),
+                ssl: true,
+                
+            
                 autoLoadEntities: true,
                 entities: [User, Family , Member],
                 synchronize: true

@@ -13,7 +13,6 @@ export class RefreshTokenStrategy extends PassportStrategy(
         const secret = configService.get<string>('JWT_REFRESH_SECRET');
         super({
             jwtFromRequest: (req: Request) => {
-                // Retrieve the refresh token from cookies
                 if (req && req.cookies) {
                     return req.cookies.refreshToken;
                 }

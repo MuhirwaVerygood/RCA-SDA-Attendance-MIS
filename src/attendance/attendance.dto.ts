@@ -1,51 +1,56 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsInt,  IsOptional, Min } from "class-validator";
+import { Family } from "src/families/families.entity";
 
 export class AttendanceSummaryDto {
-    @IsOptional()
-    @IsInt()
-    @Min(0)
-    abanditswe?: number;
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  abanditswe?: number;
 
-    @IsInt()
-    @Min(0)
-    abaje: number;
+  @IsInt()
+  @Min(0)
+  abaje: number;
 
-    @IsInt()
-    @Min(0)
-    abasuye: number;
+  @IsInt()
+  @Min(0)
+  abasuye: number;
 
-    @IsInt()
-    @Min(0)
-    abasuwe: number;
+  @IsInt()
+  @Min(0)
+  abasuwe: number;
 
-    @IsInt()
-    @Min(0)
-    abafashije: number;
+  @IsInt()
+  @Min(0)
+  abafashije: number;
 
-    @IsInt()
-    @Min(0)
-    abafashijwe: number;
+  @IsInt()
+  @Min(0)
+  abafashijwe: number;
 
-    @IsInt()
-    @Min(0)
-    abatangiyeIsabato: number;
+  @IsInt()
+  @Min(0)
+  abatangiyeIsabato: number;
 
-    @IsInt()
-    @Min(0)
-    abarwayi: number;
+  @IsInt()
+  @Min(0)
+  abarwayi: number;
 
-    @IsInt()
-    @Min(0)
-    abafiteImpamvu: number;
+  @IsInt()
+  @Min(0)
+  abafiteImpamvu: number;
 
-    @IsInt()
-    @Min(0)
-    abashyitsi: number; 
+  @IsInt()
+  @Min(0)
+  abashyitsi: number;
 
-
-    
+  @IsInt()
+  @Min(0)
+  abize7: number;
 }
+
+
+
 export class GroupedAttendanceDto extends AttendanceSummaryDto {
     date: string;
 }

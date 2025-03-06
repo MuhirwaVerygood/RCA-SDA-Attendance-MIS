@@ -348,6 +348,7 @@ export class AttendanceService {
       abafashijwe: attendanceSummary.abafashijwe || 0,
       abatangiyeIsabato: attendanceSummary.abatangiyeIsabato || 0,
       abarwayi: attendanceSummary.abarwayi || 0,
+      abize7: attendanceSummary.abize7 || 0,
       abafiteImpamvu: attendanceSummary.abafiteImpamvu || 0,
     };
     const abashyitsi = attendanceSummary.abashyitsi || 0;
@@ -375,6 +376,66 @@ export class AttendanceService {
 
     return { message: 'Attendance added successfully' };
   }
+
+
+
+  async addFamilyAttendanceByForm(attendanceSummary: AttendanceSummaryDto, req: any): Promise<{message: string }>{
+     const user = await this.userRepository.findOne({
+       where: { id: req.user.id },
+       relations: ['family'],
+     });
+    
+    const findFamily = await this.familyRepository.findOne({where :{ id: user.family.id} , relations: ["members"]})
+
+     if (!user) {
+       throw new NotFoundException('Not Authorized');
+     }
+
+    
+
+     const sabbathDate = getPreviousSabbathDate(new Date());
+     const attendanceExists = await this.attendanceRepository.find({
+       where: { date: sabbathDate , family:{id: user.family.id} },
+     });
+
+     if (attendanceExists) {
+       this.attendanceRepository.remove(attendanceExists);
+     }
+
+    
+     const validatedAttendance = {
+       abaje: attendanceSummary.abaje || 0,
+       abasuye: attendanceSummary.abasuye || 0,
+       abasuwe: attendanceSummary.abasuwe || 0,
+       abafashije: attendanceSummary.abafashije || 0,
+       abafashijwe: attendanceSummary.abafashijwe || 0,
+       abatangiyeIsabato: attendanceSummary.abatangiyeIsabato || 0,
+       abize7: attendanceSummary.abize7 ||0,
+       abarwayi: attendanceSummary.abarwayi || 0,
+       abafiteImpamvu: attendanceSummary.abafiteImpamvu || 0,
+     };
+     const abashyitsi = attendanceSummary.abashyitsi || 0;
+
+     const totalFamilyMembers =  findFamily.members.length
+     for (const [key, value] of Object.entries(validatedAttendance)) {
+       if (value > totalFamilyMembers) {
+         throw new BadRequestException(
+           `Invalid value for '${key}': ${value}. It cannot exceed the total family members (${totalFamilyMembers}).`,
+         );
+       }
+     }
+
+     // Create a new general attendance record without a family
+     await this.attendanceRepository.save({
+       ...validatedAttendance,
+       abanditswe: totalFamilyMembers,
+       abashyitsi,
+       date: sabbathDate,
+       family: user.family,
+     });
+    return {message: "Attendance added successfully"}
+  }
+
 
   async getAttendancesByDate(
     date: Date,

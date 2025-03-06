@@ -37,7 +37,6 @@ export class AttendanceController {
     requestData: any,
     @Req() req,
   ) {
-    
     return this.attendanceService.addFamilyAttendance(requestData, req);
   }
 
@@ -100,6 +99,13 @@ export class AttendanceController {
     return this.attendanceService.addChurchAttendance(req);
   }
 
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Permissions(Permission.AddFamilyAttendance)
+    @Post("/family/form")
+  async addFamilyAttendanceByForm(@Body() attendanceRequest: AttendanceSummaryDto, @Req() req) {
+    return this.attendanceService.addFamilyAttendanceByForm(attendanceRequest, req)
+    }
+    
   @UseGuards(AccessTokenGuard, RolesGuard)
   @Permissions(Permission.AddFamilyAttendance)
   @Post('/:familyId')

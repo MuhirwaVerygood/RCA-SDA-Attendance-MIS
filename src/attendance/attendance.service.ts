@@ -8,6 +8,7 @@ import { getPreviousSabbathDate, getSaturdayOccurrence,  } from './sabbathAttend
 import { UserService } from 'src/user/user.service';
 import { Member } from 'src/members/members.entity';
 import { User } from 'src/auth/user.entity';
+import { Family } from 'src/families/families.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -17,6 +18,8 @@ export class AttendanceService {
     @InjectRepository(Member)
     private readonly familiesService: FamiliesService,
     private readonly userService: UserService,
+    @InjectRepository(Family)
+    private readonly familyRepository: Repository<Family>,
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -231,6 +234,98 @@ export class AttendanceService {
     return { message: 'Attendance recorded successfully' };
   }
 
+  async processFamilyAttendance(
+    req: any,
+    membersAttendance: any[],
+    abashyitsi
+  ): Promise<Map<number, Attendance>> {
+    const user = await this.userRepository.findOne({ where: { id: req.user.id } , relations: ["family"] })
+    
+    if (!user ) {
+      throw new NotFoundException("Not Authorized")
+    }
+
+
+    const sabbathDate = getPreviousSabbathDate(new Date());
+    const attendanceAlreadyExists = await this.attendanceRepository.findOne({where:{  date : sabbathDate, family:{id: user.family.id}}})
+    if (attendanceAlreadyExists) {
+      this.attendanceRepository.remove(attendanceAlreadyExists);
+    }
+
+    // const allFamilies = await this.familiesService.getAllFamilies();
+    const attendanceMap = new Map<number, Attendance>();
+
+    for (const member of membersAttendance) {
+      const familyContainingMember = await this.familyRepository.findOne({where: {id: user.family.id} , relations:["members"]})
+      
+      if (!familyContainingMember) {
+        console.warn(`No family found for member with ID: ${member.memberId}`);
+        continue;
+      }
+
+      let attendanceByFamily = attendanceMap.get(familyContainingMember.id);
+
+      if (!attendanceByFamily) {
+        attendanceByFamily = this.attendanceRepository.create({
+          date: sabbathDate,
+          family: familyContainingMember,
+          abanditswe: familyContainingMember.members.length,
+          abaje: 0,
+          abasuye: 0,
+          abasuwe: 0,
+          abafashije: 0,
+          abafashijwe: 0,
+          abatangiyeIsabato: 0,
+          abize7: 0,
+          abarwayi: 0,
+          abafiteImpamvu: 0,
+          abashyitsi : abashyitsi
+        });
+        attendanceMap.set(familyContainingMember.id, attendanceByFamily);
+      }
+
+      if (member.yaje) attendanceByFamily.abaje += 1;
+      if (member.yarasuye) attendanceByFamily.abasuye += 1;
+      if (member.yarasuwe) attendanceByFamily.abasuwe += 1;
+      if (member.yarafashije) attendanceByFamily.abafashije += 1;
+      if (member.yarafashijwe) attendanceByFamily.abafashijwe += 1;
+      if (member.yatangiyeIsabato) attendanceByFamily.abatangiyeIsabato += 1;
+      if (member.yize7) attendanceByFamily.abize7 += 1;
+      if (member.ararwaye) attendanceByFamily.abarwayi += 1;
+      if (member.afiteIndiMpamvu) attendanceByFamily.abafiteImpamvu += 1;
+    }
+
+    return attendanceMap;
+  }
+
+
+
+  async addFamilyAttendance(
+    attendanceRequest: {
+    attendances: any[];
+    abashyitsi: number;
+  } , req: any ) : Promise<{ message : string}> {
+    if (!Array.isArray(attendanceRequest.attendances)) {
+      throw new BadRequestException('Invalid attendance data');
+    }
+
+
+
+    // Process attendance by family
+    const attendanceMap = await this.processFamilyAttendance(
+      req,
+      attendanceRequest.attendances, 
+      attendanceRequest.abashyitsi
+    );
+
+    
+    
+    // Save all processed attendance records
+    await this.attendanceRepository.save([...attendanceMap.values()]);
+
+    return { message: 'Attendance recorded successfully' };
+  }
+
   async addGeneralAttendanceByForm(
     attendanceSummary: AttendanceSummaryDto,
   ): Promise<{ message: string }> {
@@ -290,7 +385,7 @@ export class AttendanceService {
     });
   }
 
-    async getFamilyAttendances(req: any): Promise<any> {      
+  async getFamilyAttendances(req: any): Promise<any> {
     // Fetch the user and their family
     const user = await this.userRepository.findOne({
       where: { id: req.user.id },
@@ -382,7 +477,7 @@ export class AttendanceService {
         `No attendance record found for the family on ${date.toISOString()}`,
       );
     }
-      return [attendance];
+    return [attendance];
   }
 }
 

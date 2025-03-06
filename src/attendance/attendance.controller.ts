@@ -29,22 +29,35 @@ import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
-    @UseGuards(AccessTokenGuard)
-        @Permissions(Permission.ViewOwnAttendance)
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Permissions(Permission.AddFamilyAttendance)
+  @Post('/family')
+  async addFamilyAttendance(
+    @Body()
+    requestData: any,
+    @Req() req,
+  ) {
+    
+    return this.attendanceService.addFamilyAttendance(requestData, req);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Permissions(Permission.ViewOwnAttendance)
   @Get('/family')
   async getFamilyAttendance(@Req() req): Promise<any> {
     return this.attendanceService.getFamilyAttendances(req);
   }
 
-   
-    @UseGuards(AccessTokenGuard)     
-    @Permissions(Permission.ViewOwnAttendance)    
-    @Get('/family/:date')
-        async getFamilyAttendanceByDate(@Req() req, @Param('date') date: Date): Promise<any> {
-            return this.attendanceService.getFamilyAttendanceByDate(req, date);
-}
-        
-    
+  @UseGuards(AccessTokenGuard)
+  @Permissions(Permission.ViewOwnAttendance)
+  @Get('/family/:date')
+  async getFamilyAttendanceByDate(
+    @Req() req,
+    @Param('date') date: Date,
+  ): Promise<any> {
+    return this.attendanceService.getFamilyAttendanceByDate(req, date);
+  }
+
   @UseGuards(AccessTokenGuard, RolesGuard)
   @Permissions(Permission.ViewGeneralAttendance)
   @Get('total/:date')
@@ -94,6 +107,7 @@ export class AttendanceController {
   @ApiOperation({ summary: 'Add attendance for a specific family' })
   @ApiParam({
     name: 'familyId',
+
     description: 'The unique ID of the family',
     required: true,
     example: '2',

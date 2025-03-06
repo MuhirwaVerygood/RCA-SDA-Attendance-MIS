@@ -42,6 +42,9 @@ export class AttendanceSummaryDto {
     @IsInt()
     @Min(0)
     abashyitsi: number; 
+
+
+    
 }
 export class GroupedAttendanceDto extends AttendanceSummaryDto {
     date: string;

@@ -17,3 +17,4 @@ import { Member } from 'src/members/members.entity';
 })
   
 export class AttendanceModule {}
+

@@ -12,7 +12,7 @@ import { Attendance } from 'src/attendance/attendance.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User, Family , Member , Attendance]),
+        TypeOrmModule.forFeature([User, Family , Member , Attendance ]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

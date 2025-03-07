@@ -27,7 +27,17 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>("PORT", 3000)
   
-  app.enableCors({ credentials: true, origin: "http://localhost:3000" });
+
+
+  app.enableCors({
+    credentials: true,
+    origin: [
+      'http://localhost:3000',
+      'https://rca-sda-attendance-mis-frontend.vercel.app',
+    ],
+  });
+
+
 
   await app.listen(port);
   console.log(`The server is running on port ${port}`);

@@ -59,7 +59,8 @@ TmXg5pIy4xd8HrVxa073fo1VwPXLZITS0peGgrdXo41tNAk7TXfK6lM0bCXjQLrU
 9EPP92hiHhUw3OM5wdLRo4/Xk7SX1IPrQuuqc3vfYYg1OAi4TVTo6bjTcpDwo6GJ
 mQ==
 -----END CERTIFICATE-----`,
-        },
+                },
+        
 
         autoLoadEntities: true,
         entities: [User, Family, Member],

@@ -5,7 +5,6 @@ import {
     Body,
     UseGuards,
     Request,
-    HttpCode,
     HttpStatus,
     Req,
     Put,
@@ -14,9 +13,11 @@ import { UserService } from './user.service';
 
 import { ApiTags,  ApiResponse, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RolesGuard } from 'src/shared/shared.roleguard';
-import {  InviteFamilyHeadDto} from 'src/auth/user.dto';
+import {  AddAdminDto} from 'src/auth/user.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { Request as Rq } from 'express';
+import { Permission } from 'src/shared/shared.permission.enum';
+import { Permissions } from 'src/shared/shared.permissions.decorator';
 
 
 interface CustomRequest extends Rq {
@@ -54,10 +55,11 @@ export class UserController {
         return this.userService.getProfile(req);
     }
 
-    @UseGuards(AccessTokenGuard)
-    @Post("familyHeads")
-    async addFamilyHeads(@Body() invitationRequest: InviteFamilyHeadDto , @Req() req ): Promise<{message:string}> {
-        return await this.userService.addFamilyHeads(invitationRequest, req);
+    @UseGuards(AccessTokenGuard, RolesGuard)
+        @Permissions(Permission.AddAdmin)
+    @Post("/admin/add")
+    async addFamilyHeads(@Body() adminAdditionRequest: AddAdminDto , @Req() req ): Promise<{message:string}> {
+        return await this.userService.addAdmin(adminAdditionRequest, req);
     }
 
     @Put("/profile")

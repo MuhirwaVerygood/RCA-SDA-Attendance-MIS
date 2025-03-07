@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { FamiliesService } from 'src/families/families.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { InviteFamilyHeadDto } from 'src/auth/user.dto';
+import { AddAdminDto  } from 'src/auth/user.dto';
 import { User } from 'src/auth/user.entity';
 
 @Injectable()
@@ -14,8 +14,6 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private readonly jwtService: JwtService,
-        private readonly familyService: FamiliesService,
         private readonly mailerService: MailerService
     ) { }
 
@@ -48,18 +46,13 @@ export class UserService {
     }
 
   
-    async addFamilyHeads(invitation: InviteFamilyHeadDto, req: any): Promise<{ message: string }> {
-        const family = await this.familyService.getFamilyById(invitation.familyId);
-        if (!family) {
-            throw new HttpException('Family not found', HttpStatus.NOT_FOUND);
-        }
+    async addAdmin(invitation: AddAdminDto, req: any): Promise<{ message: string }> {
 
-        console.log(invitation.email);
+        const user = await this.userRepository.findOne({where: { id: req.user.id}})
         
-        // Check if the user with this email already exists
         const existingUser = await this.userRepository.findOne({ where: { email: invitation.email } });
         if (existingUser) {
-            throw new HttpException('Family leader with this email already exists', HttpStatus.CONFLICT);
+            throw new HttpException('An admin with this email already exists', HttpStatus.CONFLICT);
         }
 
         // Create the new user with the role (father or mother)
@@ -67,10 +60,10 @@ export class UserService {
             username: invitation.username,
             email: invitation.email,
             password: await argon2.hash(invitation.password),
-            isFather: invitation.role === 'father',
-            isMother: invitation.role === 'mother',
-            isAdmin: false,
-            family: family,
+            isAdmin: true,
+            isFather: false, 
+            isMother: false, 
+            family: null
         });
 
         // Save the new user
@@ -83,18 +76,16 @@ export class UserService {
 
         // Send email notifications to other admins
         for (const admin of otherAdmins) {
-            const role = invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1);
-
             // Send an email to each admin about the new family head
             await this.mailerService.sendMail({
                 to: admin.email,
-                subject: 'New Family Head Added',
-                text: `Dear ${admin.username}, \n\nThis is to inform you that the admin ${req.user.username} has added ${invitation.username} as a ${role} of the family: ${family.familyName}. \n\nBest regards,\nYour Admin Team`,
+                subject: 'New Family Admin Added',
+                text: `Dear ${admin.username}, \n\nThis is to inform you that the admin ${user.username} has added ${invitation.username} as another admin in RCA-Attendance MIS. \n\nBest regards,\nYour Admin Team`,
             });
         }
 
         return {
-            message: `${invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)} added successfully`,
+            message: ` ${newUser.username} added as admin successfully `,
         };
     }
 

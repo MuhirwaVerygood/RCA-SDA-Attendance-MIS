@@ -7,5 +7,6 @@ export enum Permission {
     ViewOwnAttendance = 'view_own_attendance',
     AddFamilyAttendance = 'add_family_attendance',
     EditOwnAttendance = 'edit_own_attendance',
-    DeleteOwnAttendance= 'delete_own_attendance'
+    DeleteOwnAttendance = 'delete_own_attendance',
+    AddAdmin = "add_admin"
 }

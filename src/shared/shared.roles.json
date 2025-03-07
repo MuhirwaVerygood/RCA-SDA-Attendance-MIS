@@ -4,7 +4,8 @@
             "add_general_attendance",
             "view_general_attendance",
             "edit_general_attendance",
-            "delete_general_attendance"
+            "delete_general_attendance",
+            "add_admin"
         ],
         "father": [
             "add_family_attendance",

@@ -29,10 +29,8 @@ export class LoginUserDTO {
 }
 
 
-export class InviteFamilyHeadDto {
-    role: 'mother' | 'father';
-    username: string;
-    email: string;
-    password: string;
-    familyId: number;
+export class AddAdminDto {
+    username: string
+    email: string
+    password: string
 }

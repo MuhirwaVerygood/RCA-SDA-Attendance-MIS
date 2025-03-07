@@ -6,6 +6,7 @@ export const RolesPermissions = {
         Permission.ViewGeneralAttendance,
         Permission.EditGeneralAttendance,
         Permission.DeleteGeneralAttendance,
+        Permission.AddAdmin
     ],
     father: [
         Permission.AddFamilyAttendance,

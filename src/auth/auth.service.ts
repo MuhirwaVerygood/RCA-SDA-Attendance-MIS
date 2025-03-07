@@ -55,8 +55,15 @@ export class AuthService {
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    res.cookie('refreshToken', tokens.refreshToken);
-    res.cookie('accessToken', tokens.accessToken);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 15 * 60 * 1000,
+    });
 
     const { password, refreshToken, ...userWithoutPassword } = user;
     return res.json({ message: 'Login Successful', user: userWithoutPassword });

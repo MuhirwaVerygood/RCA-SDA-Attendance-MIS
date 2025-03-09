@@ -55,22 +55,65 @@ export class AuthService {
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    res.cookie('refreshToken', tokens.refreshToken, {
+    const isProduction = this.configService.get<string>('ENV') === 'production';
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: 'https://rca-sda-attendance-mis.onrender.com',
-    });
+      secure: isProduction, // Only set secure to true in production
+      sameSite: isProduction ? 'none' as const : 'lax' as const, // Use 'none' for cross-site cookies in production
+      domain: isProduction
+        ? 'rca-sda-attendance-mis-frontend.vercel.app'
+        : undefined, // Set domain only in production
+    };
+
+    res.cookie('refreshToken', tokens.refreshToken, cookieOptions);
     res.cookie('accessToken', tokens.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: "https://rca-sda-attendance-mis.onrender.com",
-      maxAge: 15 * 60 * 1000,
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     const { password, refreshToken, ...userWithoutPassword } = user;
     return res.json({ message: 'Login Successful', user: userWithoutPassword });
+  }
+
+  async refreshTokens(req: any, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new ForbiddenException('Access Denied: Refresh token missing');
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: req.user.id },
+      select: ['id', 'refreshToken'],
+    });
+
+    if (!user || !user.refreshToken) {
+      throw new ForbiddenException('Access Denied: Invalid user or token');
+    }
+
+    const refreshTokenMatches = await argon2.verify(
+      user.refreshToken,
+      refreshToken,
+    );
+
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied: Token mismatch');
+    }
+
+    const newAccessToken = await this.generateAccessToken(user);
+
+    const isProduction = this.configService.get<string>('ENV') === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' as 'none' : 'lax' as 'lax',
+      domain: isProduction ? 'rca-sda-attendance-mis-frontend.vercel.app' : undefined,
+      maxAge: 15 * 60 * 1000,
+    };
+
+    res.cookie('accessToken', newAccessToken, cookieOptions);
+
+    return res.json({ access_token: newAccessToken });
   }
 
   async logout(req: any) {
@@ -120,44 +163,6 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  async refreshTokens(req: any, @Res() res: Response) {
-    const refreshToken = req.cookies?.refreshToken;
-
-    if (!refreshToken) {
-      throw new ForbiddenException('Access Denied: Refresh token missing');
-    }
-
-    const user = await this.userRepository.findOne({
-      where: { id: req.user.id },
-      select: ['id', 'refreshToken'],
-    });
-
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Access Denied: Invalid user or token');
-    }
-
-    const refreshTokenMatches = await argon2.verify(
-      user.refreshToken,
-      refreshToken,
-    );
-
-    if (!refreshTokenMatches) {
-      throw new ForbiddenException('Access Denied: Token mismatch');
-    }
-
-    const newAccessToken = await this.generateAccessToken(user);
-
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: 'https://rca-sda-attendance-mis.onrender.com',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    return res.json({ access_token: newAccessToken });
   }
 
   async generateAccessToken(user: {

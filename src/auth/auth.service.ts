@@ -7,7 +7,7 @@ import { LoginUserDTO } from './user.dto';
 import { UserService } from 'src/user/user.service';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository } from 'typeorm'; 
 
 @Injectable()
 export class AuthService {
@@ -55,7 +55,7 @@ export class AuthService {
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    const isProduction = this.configService.get<string>('ENV') === 'production';
+    const isProduction = this.configService.get<string>('ENV') === 'production' ;
     const cookieOptions = {
       httpOnly: true,
       secure: isProduction, // Only set secure to true in production
@@ -65,10 +65,14 @@ export class AuthService {
         : undefined, // Set domain only in production
     };
 
+    console.log(tokens.refreshToken);
+    console.log(tokens.accessToken);
+    
+    
     res.cookie('refreshToken', tokens.refreshToken, cookieOptions);
     res.cookie('accessToken', tokens.accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     const { password, refreshToken, ...userWithoutPassword } = user;
@@ -108,8 +112,10 @@ export class AuthService {
       secure: isProduction,
       sameSite: isProduction ? 'none' as 'none' : 'lax' as 'lax',
       domain: isProduction ? 'rca-sda-attendance-mis-frontend.vercel.app' : undefined,
-      maxAge: 15 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000,
     };
+
+    
 
     res.cookie('accessToken', newAccessToken, cookieOptions);
 
@@ -142,7 +148,7 @@ export class AuthService {
         },
         {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: '15m',
+          expiresIn: '1d',
         },
       ),
       this.jwtService.signAsync(

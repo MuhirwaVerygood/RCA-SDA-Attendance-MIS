@@ -61,7 +61,6 @@ mQ==
 -----END CERTIFICATE-----`,
                 },
         
-
         autoLoadEntities: true,
         entities: [User, Family, Member],
         synchronize: true,

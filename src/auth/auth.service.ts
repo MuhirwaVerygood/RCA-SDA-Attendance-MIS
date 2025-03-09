@@ -58,10 +58,14 @@ export class AuthService {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: 'none',
+      domain: 'https://rca-sda-attendance-mis.onrender.com',
     });
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
+      domain: "https://rca-sda-attendance-mis.onrender.com",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -146,9 +150,11 @@ export class AuthService {
     const newAccessToken = await this.generateAccessToken(user);
 
     res.cookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        secure: true,
-      maxAge: 15 * 60 * 1000, 
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      domain: 'https://rca-sda-attendance-mis.onrender.com',
+      maxAge: 15 * 60 * 1000,
     });
 
     return res.json({ access_token: newAccessToken });

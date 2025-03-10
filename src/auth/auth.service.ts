@@ -8,6 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm'; 
+import path from 'path';
 
 @Injectable()
 export class AuthService {
@@ -112,6 +113,7 @@ export class AuthService {
       secure: isProduction,
       sameSite: isProduction ? 'none' as 'none' : 'lax' as 'lax',
       domain: isProduction ? 'rca-sda-attendance-mis-frontend.vercel.app' : undefined,
+      path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     };
 

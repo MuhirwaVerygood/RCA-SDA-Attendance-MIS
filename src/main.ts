@@ -34,6 +34,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://rca-sda-attendance-mis-frontend.vercel.app',
+      'https://rca-sda-attendance-mis-frontend.onrender.com'
     ],
   });
 

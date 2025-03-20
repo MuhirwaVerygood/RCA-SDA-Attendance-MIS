@@ -84,6 +84,9 @@ export class FamiliesController {
     return family;
   }
 
+
+
+
   @UseGuards(AccessTokenGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update family details' })

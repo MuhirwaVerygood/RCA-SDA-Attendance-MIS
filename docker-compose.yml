@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: SDA_Attendance
+    image: rca-attendance-backend:1.0.0
+
+
+    environment:
+       

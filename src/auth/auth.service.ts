@@ -8,7 +8,6 @@ import { UserService } from 'src/user/user.service';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm'; 
-import path from 'path';
 
 @Injectable()
 export class AuthService {

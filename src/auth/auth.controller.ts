@@ -55,8 +55,8 @@ export class AuthController {
   })
 
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid password or email' })
-  signin(@Body() data: LoginUserDTO, @Res() res) {
-    return this.authService.signIn(data, res);
+  signin(@Body() data: LoginUserDTO, @Res() res , @Req() req: Request) {
+    return this.authService.signIn(data, res, req);
   }
 
 

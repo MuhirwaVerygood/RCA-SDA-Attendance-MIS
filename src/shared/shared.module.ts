@@ -55,7 +55,7 @@ import { User } from 'src/auth/user.entity';
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
           auth: {
-            user: configService.get<string>('EMAIL_USERNAME'),
+            user: configService.get<string>('EMAIL_USERNAME'),  
             pass: configService.get<string>('EMAIL_PASSWORD'),
           },
           secure: configService.get<string>('ENV') === 'production',

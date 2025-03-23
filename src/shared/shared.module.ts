@@ -42,6 +42,8 @@ import { User } from 'src/auth/user.entity';
               }
             : false,
           autoLoadEntities: true,
+
+          
           entities: [User, Family, Member],
           synchronize: true,
         };

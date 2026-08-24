@@ -24,6 +24,7 @@ lerna-debug.log*
 .project
 .classpath
 .c9/
+temp_auto_push.bat
 *.launch
 .settings/
 *.sublime-workspace
@@ -31,11 +32,9 @@ lerna-debug.log*
 # IDE - VSCode
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # temp directory
 .temp
@@ -49,7 +48,6 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-temp_auto_push.bat
-temp_interactive_push.bat
-.gitignore
 branch_structure.json
+.gitignore
+config.bat
